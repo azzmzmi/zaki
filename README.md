@@ -233,7 +233,7 @@ git push -u origin main
 
 ## Production Checklist
 
-- [ ] Change `JWT_SECRET` to a strong random key
+- [ ] Change `JWT_SECRET` to a strong random key (Done)
 - [ ] Update `CORS_ORIGINS` to your production domain
 - [ ] Use production MongoDB instance (MongoDB Atlas)
 - [ ] Enable HTTPS

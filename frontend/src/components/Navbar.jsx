@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, User, LogOut, Globe, Moon, Sun } from "lucide-react";
+import { ShoppingCart, User, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
+import ThemeSwitcher from "./ThemeSwitcher";
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
@@ -17,11 +18,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isAdmin, clearAuth } = useAuthStore();
   const totalItems = useCartStore((state) => state.totalItems());
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
 
   const handleLogout = () => {
     clearAuth();
@@ -31,15 +27,6 @@ export default function Navbar() {
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  };
-
-  const toggleDarkMode = () => {
-    if (isDark) {
-      document.documentElement.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
-    }
-    setIsDark(!isDark);
   };
 
   return (
@@ -89,14 +76,9 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleDarkMode}
               data-testid="theme-toggle"
             >
-              {isDark ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
+              <ThemeSwitcher />
             </Button>
 
             <DropdownMenu>
