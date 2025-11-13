@@ -41,6 +41,15 @@ UPLOADS_DIR.mkdir(exist_ok=True)
 # Create the main app
 app = FastAPI(title="eCommerce API", version="1.0.0")
 
+# Add CORS middleware BEFORE routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=[origin.strip() for origin in os.environ.get('CORS_ORIGINS', '*').split(',')],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
 # Import for file serving
 from fastapi.responses import FileResponse
 
@@ -479,14 +488,6 @@ async def serve_upload(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -494,21 +495,33 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+@app.get("/api/analytics")
+async def analytics_health():
+    return {"status": "ok"}
+
 @app.on_event("startup")
 async def startup():
     # Create admin user if not exists
-    admin_exists = await db.users.find_one({"email": "admin@ecommerce.com"})
-    if not admin_exists:
-        admin = User(
-            email="admin@ecommerce.com",
-            full_name="Admin User",
-            role=UserRole.ADMIN
-        )
-        admin_dict = admin.model_dump()
-        admin_dict['created_at'] = admin_dict['created_at'].isoformat()
-        admin_dict['password'] = hash_password("admin123")
-        await db.users.insert_one(admin_dict)
-        logger.info("Admin user created: admin@ecommerce.com / admin123")
+    try:
+        admin_exists = await db.users.find_one({"email": "admin@ecommerce.com"})
+        if not admin_exists:
+            admin = User(
+                email="admin@ecommerce.com",
+                full_name="Admin User",
+                role=UserRole.ADMIN
+            )
+            admin_dict = admin.model_dump()
+            admin_dict['created_at'] = admin_dict['created_at'].isoformat()
+            admin_dict['password'] = hash_password("admin123")
+            await db.users.insert_one(admin_dict)
+            logger.info("Admin user created: admin@ecommerce.com / admin123")
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
