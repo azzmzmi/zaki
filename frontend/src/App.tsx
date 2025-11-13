@@ -7,6 +7,8 @@ import './i18n';
 import './App.css';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import { ThemeProvider } from './context/ThemeContext';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -76,54 +78,59 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            } />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/products" element={
-              <ProtectedRoute adminOnly>
-                <AdminProducts />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/categories" element={
-              <ProtectedRoute adminOnly>
-                <AdminCategories />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/orders" element={
-              <ProtectedRoute adminOnly>
-                <AdminOrders />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/users" element={
-              <ProtectedRoute adminOnly>
-                <AdminUsers />
-              </ProtectedRoute>
-            } />
-          </Routes>
-          <Toaster position="top-right" />
-        </div>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900 transition-colors duration-200">
+            <Navbar />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                } />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/products" element={
+                  <ProtectedRoute adminOnly>
+                    <AdminProducts />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/categories" element={
+                  <ProtectedRoute adminOnly>
+                    <AdminCategories />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/orders" element={
+                  <ProtectedRoute adminOnly>
+                    <AdminOrders />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/users" element={
+                  <ProtectedRoute adminOnly>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </main>
+            <Footer />
+            <Toaster position="top-right" />
+          </div>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
