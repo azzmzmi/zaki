@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Facebook, WhatsApp, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, MessageCircle, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { CONTACT_INFO } from '@/config/contact';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -12,22 +13,20 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Sand Valley, LLC</h3>
+            <h3 className="text-lg font-bold mb-4">{CONTACT_INFO.company_name}</h3>
             <p className="text-sm text-gray-300 mb-4">
               {t('footer_description') || 'Your trusted online shopping destination for quality products and excellent service.'}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a href={CONTACT_INFO.social.facebook} className="text-gray-300 hover:text-white transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="https://wa.me/" className="text-gray-300 hover:text-white transition-colors">
-                <WhatsApp size={20} />
+              <a href={CONTACT_INFO.social.whatsapp} className="text-gray-300 hover:text-white transition-colors">
+                <MessageCircle size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a href={CONTACT_INFO.social.instagram} className="text-gray-300 hover:text-white transition-colors">
                 <Instagram size={20} />
               </a>
-              
-             
             </div>
           </div>
 
@@ -59,15 +58,15 @@ export default function Footer() {
             <div className="space-y-3 text-sm text-gray-300">
               <div className="flex gap-2 items-start">
                 <Phone size={18} className="mt-0.5 flex-shrink-0" />
-                <span>+1 (555) 123-4567</span>
+                <a href={`tel:${CONTACT_INFO.phone}`} className="hover:text-white transition-colors">{CONTACT_INFO.phone}</a>
               </div>
               <div className="flex gap-2 items-start">
                 <Mail size={18} className="mt-0.5 flex-shrink-0" />
-                <span>support@shophub.com</span>
+                <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-white transition-colors">{CONTACT_INFO.email}</a>
               </div>
               <div className="flex gap-2 items-start">
                 <MapPin size={18} className="mt-0.5 flex-shrink-0" />
-                <span>123 Shopping Street, Commerce City, CC 12345</span>
+                <span>{CONTACT_INFO.address}</span>
               </div>
             </div>
           </div>
@@ -78,7 +77,7 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p>&copy; {currentYear} ShopHub. {t('all_rights_reserved') || 'All rights reserved.'}</p>
+          <p>&copy; {currentYear} {CONTACT_INFO.company_name}. {t('all_rights_reserved') || 'All rights reserved.'}</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition-colors">{t('privacy') || 'Privacy'}</a>
             <a href="#" className="hover:text-white transition-colors">{t('terms') || 'Terms'}</a>

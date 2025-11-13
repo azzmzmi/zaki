@@ -9,7 +9,7 @@ const resources = {
       // Common
       'app.name': 'SandValley',
       'app.tagline': 'The First Yemeni Products Store in USA',
-      'common.welcome': 'Sand Valley LLC specializes in providing high-quality wholesale products to meet the diverse needs of businesses. Our commitment to excellence ensures that clients receive reliable service and exceptional value every time.',
+      'common.welcome': 'High-quality wholesale products, reliable service, and exceptional value every time.',
       'common.loading': 'Loading...',
       'common.error': 'Error',
       'common.success': 'Success',
@@ -283,6 +283,24 @@ const resources = {
       'home.securePaymentDesc': 'معاملات آمنة ومشفرة',
       'home.featuredProducts': 'المنتجات المميزة',
       'home.shopByCategory': 'تسوق حسب الفئة',
+      'home.contactUs': 'اتصل بنا',
+     // Footer
+      'footer_description': 'موقع تسوق إلكتروني موثوق به لمنتجات عالية الجودة وخدمة ممتازة.',
+      'quick_links': 'الروابط السريعة',
+      'home': 'الرئيسية',
+      'products': 'المنتجات',
+      'cart': 'السلة',
+      'login': 'تسجيل الدخول',
+      'customer_service': 'خدمة العملاء',
+      'about_us': 'عن ساند فالي',
+      'contact_us': 'اتصل بنا',
+      'privacy_policy': 'سياسة الخصوصية',
+      'terms_conditions': 'الشروط والأحكام',
+      'contact_info': 'معلومات الاتصال',
+      'all_rights_reserved': 'جميع الحقوق محفوظة.',
+      'privacy': 'خصوصية',
+      'terms': 'بنود',
+      'sitemap': 'خرائط الموقع', 
     }
   }
 };
