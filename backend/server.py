@@ -504,6 +504,18 @@ async def health_check():
 async def analytics_health():
     return {"status": "ok"}
 
+@app.get("/api/debug/cors")
+async def debug_cors():
+    cors_origins = os.environ.get('CORS_ORIGINS', '*').split(',')
+    return {
+        "cors_origins": [origin.strip() for origin in cors_origins],
+        "raw_env": os.environ.get('CORS_ORIGINS', 'NOT SET')
+    }
+
+@app.options("/{full_path:path}")
+async def preflight_handler(full_path: str):
+    return {"status": "ok"}
+
 @app.on_event("startup")
 async def startup():
     # Create admin user if not exists
