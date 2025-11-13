@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, WhatsApp, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4">ShopHub</h3>
+            <h3 className="text-lg font-bold mb-4">Sand Valley, LLC</h3>
             <p className="text-sm text-gray-300 mb-4">
               {t('footer_description') || 'Your trusted online shopping destination for quality products and excellent service.'}
             </p>
@@ -20,15 +20,14 @@ export default function Footer() {
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <Twitter size={20} />
+              <a href="https://wa.me/" className="text-gray-300 hover:text-white transition-colors">
+                <WhatsApp size={20} />
               </a>
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <Linkedin size={20} />
-              </a>
+              
+             
             </div>
           </div>
 
