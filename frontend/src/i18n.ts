@@ -90,9 +90,27 @@ const resources = {
       'home.securePaymentDesc': 'Safe and encrypted transactions',
       'home.featuredProducts': 'Featured Products',
       'home.shopByCategory': 'Shop by Category',
+      
+      // Footer
+      'footer_description': 'Your trusted online shopping destination for quality products and excellent service.',
+      'quick_links': 'Quick Links',
+      'home': 'Home',
+      'products': 'Products',
+      'cart': 'Cart',
+      'login': 'Login',
+      'customer_service': 'Customer Service',
+      'about_us': 'About Us',
+      'contact_us': 'Contact Us',
+      'privacy_policy': 'Privacy Policy',
+      'terms_conditions': 'Terms & Conditions',
+      'contact_info': 'Contact Info',
+      'all_rights_reserved': 'All rights reserved.',
+      'privacy': 'Privacy',
+      'terms': 'Terms',
+      'sitemap': 'Sitemap',
     }
   },
-  es: {
+ /*  es: {
     translation: {
       // Common
       'app.name': 'SandValley',
@@ -178,7 +196,7 @@ const resources = {
       'home.featuredProducts': 'Productos Destacados',
       'home.shopByCategory': 'Comprar por Categoría',
     }
-  },
+  }, */
   ar: {
     translation: {
       // Common
