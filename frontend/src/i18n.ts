@@ -9,7 +9,7 @@ const resources = {
       // Common
       'app.name': 'SandValley',
       'app.tagline': 'The First Yemeni Products Store in USA',
-      'common.welcome': 'Sand Valley LLC specializes in providing high-quality wholesale products to meet the diverse needs of businesses. Our commitment to excellence ensures that clients receive reliable service and exceptional value every time.',
+      'common.welcome': 'High-quality wholesale products, reliable service, and exceptional value every time.',
       'common.loading': 'Loading...',
       'common.error': 'Error',
       'common.success': 'Success',
@@ -90,9 +90,27 @@ const resources = {
       'home.securePaymentDesc': 'Safe and encrypted transactions',
       'home.featuredProducts': 'Featured Products',
       'home.shopByCategory': 'Shop by Category',
+      
+      // Footer
+      'footer_description': 'Your trusted online shopping destination for quality products and excellent service.',
+      'quick_links': 'Quick Links',
+      'home': 'Home',
+      'products': 'Products',
+      'cart': 'Cart',
+      'login': 'Login',
+      'customer_service': 'Customer Service',
+      'about_us': 'About Us',
+      'contact_us': 'Contact Us',
+      'privacy_policy': 'Privacy Policy',
+      'terms_conditions': 'Terms & Conditions',
+      'contact_info': 'Contact Info',
+      'all_rights_reserved': 'All rights reserved.',
+      'privacy': 'Privacy',
+      'terms': 'Terms',
+      'sitemap': 'Sitemap',
     }
   },
-  es: {
+ /*  es: {
     translation: {
       // Common
       'app.name': 'SandValley',
@@ -178,13 +196,13 @@ const resources = {
       'home.featuredProducts': 'Productos Destacados',
       'home.shopByCategory': 'Comprar por Categoría',
     }
-  },
+  }, */
   ar: {
     translation: {
       // Common
       'app.name': 'ساندفالي',
-      'app.tagline': 'متجر المنتجات اليمنية في الولايات المتحدة الأمريكية',   
-      'common.welcome': 'تتخصص شركة ساند فالي في توفير منتجات جملة عالية الجودة لتلبية مختلف احتياجات الشركات. التزامنا بالتميز يضمن حصول عملائنا على خدمة موثوقة وقيمة استثنائية في كل مرة.',
+      'app.tagline': 'متجر المنتجات اليمنية في الولايات المتحدة الأمريكية', 
+      'common.welcome': 'توفير منتجات عالية الجودة . و خدمة موثوقة متميزه لعملائنا الكرام.',
       'common.loading': 'جاري التحميل...',
       'common.error': 'خطأ',
       'common.success': 'نجح',
@@ -265,6 +283,24 @@ const resources = {
       'home.securePaymentDesc': 'معاملات آمنة ومشفرة',
       'home.featuredProducts': 'المنتجات المميزة',
       'home.shopByCategory': 'تسوق حسب الفئة',
+      'home.contactUs': 'اتصل بنا',
+     // Footer
+      'footer_description': 'موقع تسوق إلكتروني موثوق به لمنتجات عالية الجودة وخدمة ممتازة.',
+      'quick_links': 'الروابط السريعة',
+      'home': 'الرئيسية',
+      'products': 'المنتجات',
+      'cart': 'السلة',
+      'login': 'تسجيل الدخول',
+      'customer_service': 'خدمة العملاء',
+      'about_us': 'عن ساند فالي',
+      'contact_us': 'اتصل بنا',
+      'privacy_policy': 'سياسة الخصوصية',
+      'terms_conditions': 'الشروط والأحكام',
+      'contact_info': 'معلومات الاتصال',
+      'all_rights_reserved': 'جميع الحقوق محفوظة.',
+      'privacy': 'خصوصية',
+      'terms': 'بنود',
+      'sitemap': 'خرائط الموقع', 
     }
   }
 };
