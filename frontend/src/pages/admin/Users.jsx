@@ -1,12 +1,18 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { usersApi } from '@/lib/api';
 import AdminLayout from '@/components/AdminLayout';
-import { User } from 'lucide-react';
+import { User, Edit } from 'lucide-react';
+import { useState } from 'react';
+import EditUserModal from '@/components/admin/EditUserModal';
+import { useAuthStore } from '@/store/authStore';
 
 export default function AdminUsers() {
   const { t } = useTranslation();
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users'],
@@ -15,6 +21,11 @@ export default function AdminUsers() {
       return response.data;
     }
   });
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
 
   return (
     <AdminLayout>
@@ -42,10 +53,26 @@ export default function AdminUsers() {
                   }`} data-testid={`user-role-${user.id}`}>
                     {user.role}
                   </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleEditUser(user)}
+                    data-testid={`edit-user-${user.id}`}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
                 </div>
               </Card>
             ))}
           </div>
+        )}
+        
+        {selectedUser && (
+          <EditUserModal
+            user={selectedUser}
+            open={isEditModalOpen}
+            onOpenChange={setIsEditModalOpen}
+          />
         )}
       </div>
     </AdminLayout>

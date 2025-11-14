@@ -20,6 +20,9 @@ const resources = {
       'common.edit': 'Edit',
       'common.search': 'Search',
       'common.filter': 'Filter',
+      'common.sending': 'Sending...',
+      'common.resetting': 'Resetting...',
+      'common.saving': 'Saving...',
       
       // Navigation
       'nav.home': 'Home',
@@ -38,7 +41,25 @@ const resources = {
       'auth.fullName': 'Full Name',
       'auth.loginSuccess': 'Logged in successfully',
       'auth.registerSuccess': 'Registered successfully',
+      'auth.registerError': 'Email already registered',
+      'auth.forgotPassword': 'Forgot Password',
+      'auth.resetPassword': 'Reset Password',
+      'auth.resetPasswordSuccess': 'Password reset successfully',
       'auth.loginError': 'Invalid credentials',
+      'auth.resetPasswordError': 'Invalid token',
+      'auth.enterNewPassword': 'Enter new password',
+      'auth.passwordMismatch': 'Passwords do not match',
+      'auth.emailRequired': 'Email is required',
+      'auth.allFieldsRequired': 'All fields are required',
+      'auth.emailNotFound': 'Email not found',
+      'auth.resetFailed': 'Failed to reset password',
+      'auth.resetEmailSent': 'Password reset link sent to your email',
+      'auth.sendResetLink': 'Send Reset Link',
+      'auth.rememberedPassword': 'Remembered your password?',
+      'auth.enterYourEmail': 'Enter your email',
+      'auth.resetLinkSent': 'Password reset link has been sent to your email. Please check your email for the token.',
+      'auth.profileUpdateSuccess': 'Profile updated successfully',
+      
       
       // Products
       'products.title': 'Products',
@@ -66,6 +87,13 @@ const resources = {
       'checkout.paymentMethod': 'Payment Method',
       'checkout.placeOrder': 'Place Order',
       'checkout.orderSuccess': 'Order placed successfully!',
+      
+      // Checkout Address Fields
+      'checkout.streetAddress': 'Street Address',
+      'checkout.city': 'City',
+      'checkout.state': 'State',
+      'checkout.zipCode': 'ZIP Code',
+      'checkout.phone': 'Phone',
       
       // Admin
       'admin.dashboard': 'Dashboard',
@@ -108,6 +136,21 @@ const resources = {
       'privacy': 'Privacy',
       'terms': 'Terms',
       'sitemap': 'Sitemap',
+      'forgot_password': 'Forgot Password',
+      'reset_password': 'Reset Password',
+      
+      // Profile
+      'profile.title': 'My Profile',
+      'profile.accountInfo': 'Account Information',
+      'profile.email': 'Email',
+      'profile.role': 'Role',
+      'profile.changePassword': 'Change Password',
+      'profile.newPassword': 'New Password',
+      'profile.confirmPassword': 'Confirm Password',
+      'profile.leaveBlankNoChange': 'Leave blank if no change',
+      'profile.editUser': 'Edit User',
+      'profile.customer': 'Customer',
+      'profile.admin': 'Admin',
     }
   },
  /*  es: {
@@ -125,6 +168,9 @@ const resources = {
       'common.edit': 'Editar',
       'common.search': 'Buscar',
       'common.filter': 'Filtrar',
+      'common.sending': 'Enviando...',
+      'common.resetting': 'Restableciendo...',
+      'common.saving': 'Guardando...',
       
       // Navigation
       'nav.home': 'Inicio',
@@ -134,6 +180,7 @@ const resources = {
       'nav.login': 'Iniciar Sesión',
       'nav.register': 'Registrarse',
       'nav.logout': 'Cerrar Sesión',
+      'profile.title': 'Mi Perfil',
       
       // Auth
       'auth.login': 'Iniciar Sesión',
@@ -144,6 +191,17 @@ const resources = {
       'auth.loginSuccess': 'Sesión iniciada correctamente',
       'auth.registerSuccess': 'Registrado correctamente',
       'auth.loginError': 'Credenciales inválidas',
+      'auth.passwordMismatch': 'Las contraseñas no coinciden',
+      'auth.emailRequired': 'El correo electrónico es obligatorio',
+      'auth.allFieldsRequired': 'Todos los campos son obligatorios',
+      'auth.emailNotFound': 'Correo electrónico no encontrado',
+      'auth.resetFailed': 'Error al restablecer la contraseña',
+      'auth.resetEmailSent': 'Enlace de restablecimiento enviado a tu correo',
+      'auth.sendResetLink': 'Enviar Enlace de Restablecimiento',
+      'auth.rememberedPassword': '¿Recordaste tu contraseña?',
+      'auth.enterYourEmail': 'Ingresa tu correo electrónico',
+      'auth.resetLinkSent': 'El enlace de restablecimiento se ha enviado a tu correo. Por favor, revisa tu bandeja de entrada.',
+      'auth.profileUpdateSuccess': 'Perfil actualizado correctamente',
       
       // Products
       'products.title': 'Productos',
@@ -213,6 +271,9 @@ const resources = {
       'common.edit': 'تعديل',
       'common.search': 'بحث',
       'common.filter': 'تصفية',
+      'common.sending': 'جاري الإرسال...',
+      'common.resetting': 'جاري التغيير...',
+      'common.saving': 'جاري الحفظ...',
       
       // Navigation
       'nav.home': 'الرئيسية',
@@ -232,6 +293,21 @@ const resources = {
       'auth.loginSuccess': 'تم تسجيل الدخول بنجاح',
       'auth.registerSuccess': 'تم التسجيل بنجاح',
       'auth.loginError': 'بيانات اعتماد غير صالحة',
+      'auth.registerError': 'البريد الإلكتروني مسجل مسبقا',
+      'auth.forgotPassword': 'هل نسيت كلمة المرور',
+      'auth.resetPassword': 'تغيير كلمة المرور',
+      'auth.resetPasswordSuccess': 'تم تغيير كلمة المرور بنجاح',
+      'auth.passwordMismatch': 'كلمات المرور غير متطابقة',
+      'auth.emailRequired': 'البريد الإلكتروني مطلوب',
+      'auth.allFieldsRequired': 'جميع الحقول مطلوبة',
+      'auth.emailNotFound': 'البريد الإلكتروني غير موجود',
+      'auth.resetFailed': 'فشل في تغيير كلمة المرور',
+      'auth.resetEmailSent': 'تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني',
+      'auth.sendResetLink': 'إرسال رابط التغيير',
+      'auth.rememberedPassword': 'تذكرت كلمة المرور؟',
+      'auth.enterYourEmail': 'أدخل بريدك الإلكتروني',
+      'auth.resetLinkSent': 'تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.',
+      'auth.profileUpdateSuccess': 'تم تحديث الملف الشخصي بنجاح',
       
       // Products
       'products.title': 'المنتجات',
@@ -259,6 +335,13 @@ const resources = {
       'checkout.paymentMethod': 'طريقة الدفع',
       'checkout.placeOrder': 'تقديم الطلب',
       'checkout.orderSuccess': 'تم تقديم الطلب بنجاح!',
+      
+      // Checkout Address Fields
+      'checkout.streetAddress': 'عنوان الشارع',
+      'checkout.city': 'المدينة',
+      'checkout.state': 'الولاية',
+      'checkout.zipCode': 'الرمز البريدي',
+      'checkout.phone': 'الهاتف',
       
       // Admin
       'admin.dashboard': 'لوحة التحكم',
@@ -299,6 +382,22 @@ const resources = {
       'contact_info': 'معلومات الاتصال',
       'all_rights_reserved': 'جميع الحقوق محفوظة.',
       'privacy': 'خصوصية',
+      'forgot_password': 'هل نسيت كلمة المرور',
+      'reset_password': 'تغيير كلمة المرور',
+      
+      // Profile
+      'profile.title': 'ملفي الشخصي',
+      'profile.accountInfo': 'معلومات الحساب',
+      'profile.email': 'البريد الإلكتروني',
+      'profile.role': 'الدور',
+      'profile.changePassword': 'تغيير كلمة المرور',
+      'profile.newPassword': 'كلمة المرور الجديدة',
+      'profile.confirmPassword': 'تأكيد كلمة المرور',
+      'profile.leaveBlankNoChange': 'اتركه فارغاً إذا لم يكن هناك تغيير',
+      'profile.enterNewPassword': 'أدخل كلمة المرور الجديدة',
+      'profile.editUser': 'تعديل المستخدم',
+      'profile.customer': 'عميل',
+      'profile.admin': 'مدير',
       'terms': 'بنود',
       'sitemap': 'خرائط الموقع', 
     }
