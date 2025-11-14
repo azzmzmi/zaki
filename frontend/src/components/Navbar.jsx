@@ -120,6 +120,12 @@ export default function Navbar() {
                   <div className="px-2 py-1.5 text-sm font-semibold">
                     {user?.full_name}
                   </div>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" data-testid="profile-link">
+                      <User className="w-4 h-4 mr-2" />
+                      {t("profile.title")}
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleLogout}
                     data-testid="logout-button"

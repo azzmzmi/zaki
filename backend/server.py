@@ -16,6 +16,10 @@ from passlib.context import CryptContext
 import aiofiles
 from enum import Enum
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -25,7 +29,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Configuration
-JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+JWT_SECRET = os.environ.get('JWT_SECRET', 'raed123')
 JWT_ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
@@ -86,6 +90,18 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[UserRole] = None
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
 class Token(BaseModel):
     access_token: str
     refresh_token: str
@@ -128,6 +144,15 @@ class OrderItem(BaseModel):
     quantity: int
     price: float
 
+class AddressInfo(BaseModel):
+    street_address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str = "United States"
+    phone: Optional[str] = None
+    full_name: Optional[str] = None
+
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -135,13 +160,13 @@ class Order(BaseModel):
     items: List[OrderItem]
     total: float
     status: OrderStatus = OrderStatus.PENDING
-    shipping_address: str
+    shipping_address: AddressInfo
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class OrderCreate(BaseModel):
     items: List[OrderItem]
     total: float
-    shipping_address: str
+    shipping_address: AddressInfo
 
 class OrderStatusUpdate(BaseModel):
     status: OrderStatus
@@ -187,8 +212,10 @@ def decode_token(token: str) -> dict:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
+        logger.error(f"Token has expired: {token[:20]}...")
         raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.JWTError:
+    except jwt.PyJWTError as e:
+        logger.error(f"Invalid token: {str(e)}, token: {token[:20]}...")
         raise HTTPException(status_code=401, detail="Invalid token")
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
@@ -262,6 +289,145 @@ async def login(credentials: UserLogin):
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@api_router.put("/auth/profile", response_model=User)
+async def update_profile(update_data: UserUpdate, current_user: User = Depends(get_current_user)):
+    try:
+        logger.info(f"Updating profile for user {current_user.id}")
+        logger.info(f"Update data: {update_data}")
+        
+        update_dict = {}
+        
+        if update_data.full_name is not None:  # Allow empty string
+            update_dict['full_name'] = update_data.full_name
+        
+        if update_data.password:
+            update_dict['password'] = hash_password(update_data.password)
+        
+        if update_data.role and current_user.role == UserRole.ADMIN:
+            update_dict['role'] = update_data.role
+        
+        logger.info(f"Update dict: {update_dict}")
+        
+        if update_dict:
+            result = await db.users.update_one(
+                {"id": current_user.id},
+                {"$set": update_dict}
+            )
+            
+            logger.info(f"Update result: matched={result.matched_count}, modified={result.modified_count}")
+            
+            if result.matched_count == 0:
+                logger.error(f"User not found: {current_user.id}")
+                raise HTTPException(status_code=404, detail="User not found")
+        
+        updated_user = await db.users.find_one({"id": current_user.id}, {"_id": 0, "password": 0})
+        if not updated_user:
+            logger.error(f"User not found after update: {current_user.id}")
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        if isinstance(updated_user['created_at'], str):
+            updated_user['created_at'] = datetime.fromisoformat(updated_user['created_at'])
+        
+        logger.info(f"Profile updated successfully for user {current_user.id}")
+        return User(**updated_user)
+    
+    except Exception as e:
+        logger.error(f"Error updating profile for user {current_user.id}: {str(e)}")
+        raise
+
+@api_router.put("/auth/profile/{user_id}", response_model=User)
+async def update_user_by_id(user_id: str, update_data: UserUpdate, admin: User = Depends(require_admin)):
+    try:
+        logger.info(f"Admin {admin.id} updating profile for user {user_id}")
+        logger.info(f"Update data: {update_data}")
+        
+        update_dict = {}
+        
+        if update_data.full_name is not None:  # Allow empty string
+            update_dict['full_name'] = update_data.full_name
+        
+        if update_data.password:
+            update_dict['password'] = hash_password(update_data.password)
+        
+        if update_data.role:
+            update_dict['role'] = update_data.role
+        
+        logger.info(f"Update dict: {update_dict}")
+        
+        if update_dict:
+            result = await db.users.update_one(
+                {"id": user_id},
+                {"$set": update_dict}
+            )
+            
+            logger.info(f"Update result: matched={result.matched_count}, modified={result.modified_count}")
+            
+            if result.matched_count == 0:
+                logger.error(f"User not found: {user_id}")
+                raise HTTPException(status_code=404, detail="User not found")
+        
+        updated_user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+        if not updated_user:
+            logger.error(f"User not found after update: {user_id}")
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        if isinstance(updated_user['created_at'], str):
+            updated_user['created_at'] = datetime.fromisoformat(updated_user['created_at'])
+        
+        logger.info(f"Profile updated successfully for user {user_id} by admin {admin.id}")
+        return User(**updated_user)
+    
+    except Exception as e:
+        logger.error(f"Error updating profile for user {user_id} by admin {admin.id}: {str(e)}")
+        raise
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: PasswordReset):
+    user = await db.users.find_one({"email": request.email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    reset_token = jwt.encode(
+        {"email": request.email, "type": "password_reset", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
+        JWT_SECRET,
+        algorithm=JWT_ALGORITHM
+    )
+    
+    await db.password_resets.update_one(
+        {"email": request.email},
+        {"$set": {"token": reset_token, "created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    return {"message": "Password reset token sent to email", "token": reset_token}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: PasswordResetConfirm):
+    try:
+        payload = jwt.decode(request.token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "password_reset":
+            raise HTTPException(status_code=400, detail="Invalid token type")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=400, detail="Invalid reset token")
+    
+    email = payload.get("email")
+    user = await db.users.find_one({"email": email})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    hashed_password = hash_password(request.new_password)
+    await db.users.update_one(
+        {"email": email},
+        {"$set": {"password": hashed_password}}
+    )
+    
+    await db.password_resets.delete_one({"email": email})
+    
+    return {"message": "Password has been reset successfully"}
 
 # Category Routes
 @api_router.get("/categories", response_model=List[Category])
@@ -518,22 +684,28 @@ async def preflight_handler(full_path: str):
 
 @app.on_event("startup")
 async def startup():
+    logger.info("Starting up application...")
     # Create admin user if not exists
     try:
-        admin_exists = await db.users.find_one({"email": "admin@ecommerce.com"})
+        logger.info(f"Connecting to MongoDB at {mongo_url}")
+        admin_exists = await db.users.find_one({"email": "info@sandvalley.com"})
+        logger.info("Database connection successful")
         if not admin_exists:
             admin = User(
-                email="admin@ecommerce.com",
+                email="info@sandvalley.com",
                 full_name="Admin User",
                 role=UserRole.ADMIN
             )
             admin_dict = admin.model_dump()
             admin_dict['created_at'] = admin_dict['created_at'].isoformat()
-            admin_dict['password'] = hash_password("admin123")
+            admin_dict['password'] = hash_password("admin@SV")
             await db.users.insert_one(admin_dict)
-            logger.info("Admin user created: admin@ecommerce.com / admin123")
+            logger.info("Admin user created: info@sandvalley.com / admin@SV")
+        else:
+            logger.info("Admin user already exists")
     except Exception as e:
         logger.error(f"Error during startup: {e}")
+        raise
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

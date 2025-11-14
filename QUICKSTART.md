@@ -84,7 +84,7 @@ Use these credentials:
 ### Port Already in Use
 ```bash
 # Change backend port
-uvicorn server:app --reload --port 8002
+uvicorn server:app --reload --port 8001
 
 # Kill process using port 3000 (Mac/Linux)
 lsof -ti:3000 | xargs kill -9

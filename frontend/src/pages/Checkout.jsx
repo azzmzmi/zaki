@@ -6,17 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ordersApi } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import { CreditCard } from 'lucide-react';
+
+const US_STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+  'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
+  'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
+  'Wisconsin', 'Wyoming'
+];
 
 export default function Checkout() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCartStore();
-  const [shippingAddress, setShippingAddress] = useState('');
+  const { user } = useAuthStore();
+
+  const [shippingAddress, setShippingAddress] = useState({
+    full_name: user?.full_name || '',
+    street_address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    country: 'United States',
+    phone: ''
+  });
 
   const createOrderMutation = useMutation({
     mutationFn: async () => {
@@ -42,12 +64,23 @@ export default function Checkout() {
     }
   });
 
+  const handleAddressChange = (field, value) => {
+    setShippingAddress(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!shippingAddress.trim()) {
-      toast.error('Please enter shipping address');
+    
+    if (!shippingAddress.full_name || !shippingAddress.street_address || 
+        !shippingAddress.city || !shippingAddress.state || 
+        !shippingAddress.zip_code || !shippingAddress.phone) {
+      toast.error('Please fill in all address fields');
       return;
     }
+    
     createOrderMutation.mutate();
   };
 
@@ -62,15 +95,80 @@ export default function Checkout() {
               <h2 className="text-2xl font-bold mb-4">{t('checkout.shippingAddress')}</h2>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="address">Address *</Label>
-                  <Textarea
-                    id="address"
-                    value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
+                  <Label htmlFor="fullName">{t('auth.fullName')} *</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={shippingAddress.full_name}
+                    onChange={(e) => handleAddressChange('full_name', e.target.value)}
                     required
-                    rows={4}
-                    data-testid="shipping-address-input"
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="street">{t('checkout.streetAddress') || 'Street Address'} *</Label>
+                  <Input
+                    id="street"
+                    type="text"
+                    value={shippingAddress.street_address}
+                    onChange={(e) => handleAddressChange('street_address', e.target.value)}
+                    placeholder="123 Main Street"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city">{t('checkout.city') || 'City'} *</Label>
+                    <Input
+                      id="city"
+                      type="text"
+                      value={shippingAddress.city}
+                      onChange={(e) => handleAddressChange('city', e.target.value)}
+                      placeholder="New York"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="state">{t('checkout.state') || 'State'} *</Label>
+                    <Select value={shippingAddress.state} onValueChange={(value) => handleAddressChange('state', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select State" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {US_STATES.map(state => (
+                          <SelectItem key={state} value={state}>{state}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="zip">{t('checkout.zipCode') || 'ZIP Code'} *</Label>
+                    <Input
+                      id="zip"
+                      type="text"
+                      value={shippingAddress.zip_code}
+                      onChange={(e) => handleAddressChange('zip_code', e.target.value)}
+                      placeholder="10001"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="phone">{t('checkout.phone') || 'Phone'} *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={shippingAddress.phone}
+                      onChange={(e) => handleAddressChange('phone', e.target.value)}
+                      placeholder="(555) 123-4567"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </Card>
