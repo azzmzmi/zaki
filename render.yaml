@@ -10,19 +10,16 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
+      - key: UPLOADS_DIR
+        value: /opt/render/project/src/backend/uploads
     healthCheckPath: /api/analytics
     routes:
       - type: http
         source: /
         destination: /
     preDeployCommand: echo 'Starting deployment'
-
-services:
-  - type: web
-    name: ecommerce-api
-    env: python
-    buildCommand: ./build.sh
-    startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port 8000
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
+    # Persistent disk for uploaded images
+    disk:
+      name: uploads-disk
+      mountPath: /opt/render/project/src/backend/uploads
+      sizeGB: 1

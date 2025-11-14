@@ -39,8 +39,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 # Create uploads directory
-UPLOADS_DIR = ROOT_DIR / 'uploads'
-UPLOADS_DIR.mkdir(exist_ok=True)
+# Use environment variable for uploads path in production (for persistent disk)
+UPLOADS_PATH = os.environ.get('UPLOADS_DIR', str(ROOT_DIR / 'uploads'))
+UPLOADS_DIR = Path(UPLOADS_PATH)
+UPLOADS_DIR.mkdir(exist_ok=True, parents=True)
 
 # Create the main app
 app = FastAPI(title="eCommerce API", version="1.0.0")
