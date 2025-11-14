@@ -72,10 +72,10 @@ export default function Login() {
             {t('auth.register')}
           </Link>
         </p>
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+    {/*      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
           <p className="text-sm font-semibold mb-2">Demo Credentials:</p>
           <p className="text-xs text-gray-600 dark:text-gray-400">Admin: admin@ecommerce.com / admin123</p>
-        </div>
+        </div> */}
       </Card>
     </div>
   );
