@@ -1,12 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, Palette } from 'lucide-react';
+import PropTypes from 'prop-types';
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
+AdminLayout.propTypes = {
+  children: PropTypes.node.isRequired
+};
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+
+
+export default function AdminLayout({ children }) {
   const { t } = useTranslation();
   const location = useLocation();
 
@@ -15,7 +18,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/products', icon: Package, label: t('admin.products') },
     { path: '/admin/categories', icon: FolderTree, label: t('admin.categories') },
     { path: '/admin/orders', icon: ShoppingCart, label: t('admin.orders') },
-    { path: '/admin/users', icon: Users, label: t('admin.users') }
+    { path: '/admin/users', icon: Users, label: t('admin.users') },
+    { path: '/admin/theme', icon: Palette, label: t('admin.theme') || 'Theme' }
   ];
 
   return (

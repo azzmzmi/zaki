@@ -100,3 +100,9 @@ export const translationsApi = {
   getByLang: (lang: string) => api.get(`/translations/${lang}`),
   upsert: (payload: { key: string; en: string; ar: string; type?: string; ref_id?: string }) => api.post('/translations', payload)
 };
+
+// Theme API
+export const themeApi = {
+  get: () => api.get('/theme'),
+  update: (data: any) => api.put('/theme', data)
+};

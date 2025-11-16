@@ -159,7 +159,7 @@ export default function Checkout() {
                   </div>
 
                   <div>
-                    <Label htmlFor="phone">{t('checkout.phone') || 'Phone'} *</Label>
+                    <Label htmlFor="phone">{t('checkout.phone')} *</Label>
                     <Input
                       id="phone"
                       type="tel"
@@ -180,19 +180,18 @@ export default function Checkout() {
                   <div className="flex items-center gap-3">
                     <CreditCard className="w-6 h-6 text-blue-600" />
                     <div>
-                      <p className="font-semibold">Mock Payment (Demo)</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">No actual charges will be made</p>
+                      <p className="font-semibold">{t('checkout.paymentMethod')}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('checkout.securePayment')}</p>
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 italic">* This is a demo checkout. No real payment will be processed.</p>
               </div>
             </Card>
           </div>
 
           <div>
             <Card className="p-6 sticky top-24">
-              <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
               <div className="space-y-4 mb-6">
                 {items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm" data-testid={`order-item-${item.id}`}>

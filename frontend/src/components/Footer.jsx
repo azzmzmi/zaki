@@ -7,10 +7,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-r from-slate-900 to-blue-900 dark:from-black dark:to-slate-900 text-white mt-16">
+    <footer className="w-full bg-gradient-to-r from-slate-900 to-blue-900 dark:from-black dark:to-slate-900 text-white mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Company Info */}
           <div>
             <h3 className="text-lg font-bold mb-4">{CONTACT_INFO.company_name}</h3>
@@ -34,21 +34,10 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">{t('quick_links') || 'Quick Links'}</h4>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li><a href="/" className="hover:text-white transition-colors">{t('home') || 'Home'}</a></li>
-              <li><a href="/products" className="hover:text-white transition-colors">{t('products') || 'Products'}</a></li>
-              <li><a href="/cart" className="hover:text-white transition-colors">{t('cart') || 'Cart'}</a></li>
-              <li><a href="/login" className="hover:text-white transition-colors">{t('login') || 'Login'}</a></li>
-            </ul>
-          </div>
-
-          {/* Customer Service */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">{t('customer_service') || 'Customer Service'}</h4>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li><a href="#" className="hover:text-white transition-colors">{t('about_us') || 'About Us'}</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">{t('contact_us') || 'Contact Us'}</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">{t('privacy_policy') || 'Privacy Policy'}</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">{t('terms_conditions') || 'Terms & Conditions'}</a></li>
+              <li><a href="/" className="hover:text-white transition-colors">{t('nav.home') || 'Home'}</a></li>
+              <li><a href="/products" className="hover:text-white transition-colors">{t('nav.products') || 'Products'}</a></li>
+              <li><a href="/cart" className="hover:text-white transition-colors">{t('cart.title') || 'Cart'}</a></li>
+              <li><a href="/login" className="hover:text-white transition-colors">{t('auth.login') || 'Login'}</a></li>
             </ul>
           </div>
 
@@ -78,11 +67,6 @@ export default function Footer() {
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
           <p>&copy; {currentYear} {CONTACT_INFO.company_name}. {t('all_rights_reserved') || 'All rights reserved.'}</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-white transition-colors">{t('privacy') || 'Privacy'}</a>
-            <a href="#" className="hover:text-white transition-colors">{t('terms') || 'Terms'}</a>
-            <a href="#" className="hover:text-white transition-colors">{t('sitemap') || 'Sitemap'}</a>
-          </div>
         </div>
       </div>
     </footer>
