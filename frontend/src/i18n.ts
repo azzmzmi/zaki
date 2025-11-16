@@ -73,6 +73,13 @@ const resources = {
       'products.category': 'Category',
       'products.description': 'Description',
       'products.searchHelpArabic': 'Search works in English. Arabic product names are for display only. Use English names or browse by category.',
+      'products.sortBy': 'Sort by:',
+      'products.sortPrice': 'Price',
+      'products.sortPriceAsc': 'Price: Low to High',
+      'products.sortPriceDesc': 'Price: High to Low',
+      'products.sortNewest': 'Newest',
+      'products.sortPopular': 'Most Popular',
+      'products.sortStock': 'Stock Available',
       
       // Cart
       'cart.title': 'Shopping Cart',
@@ -267,6 +274,11 @@ const resources = {
       'home.securePaymentDesc': 'Safe and encrypted transactions',
       'home.featuredProducts': 'Featured Products',
       'home.shopByCategory': 'Shop by Category',
+      'home.mostPopular': 'Most Popular Products',
+      'pagination.previous': 'Previous',
+      'pagination.next': 'Next',
+      'pagination.page': 'Page',
+      'pagination.of': 'of',
       
       // Footer
       'footer_description': 'Your trusted online shopping destination for quality products and excellent service.',
@@ -459,6 +471,13 @@ const resources = {
       'products.category': 'الفئة',
       'products.description': 'الوصف',
       'products.searchHelpArabic': 'يعمل البحث باللغة الإنجليزية فقط. أسماء المنتجات بالعربية للعرض فقط. استخدم الأسماء الإنجليزية أو تصفح حسب الفئة.',
+      'products.sortBy': 'ترتيب حسب:',
+      'products.sortPrice': 'السعر',
+      'products.sortPriceAsc': 'السعر: من الأقل للأعلى',
+      'products.sortPriceDesc': 'السعر: من الأعلى للأقل',
+      'products.sortNewest': 'الأحدث',
+      'products.sortPopular': 'الأكثر شهرة',
+      'products.sortStock': 'المتاح',
       
       // Cart
       'cart.title': 'سلة التسوق',
@@ -643,6 +662,11 @@ const resources = {
       'home.featuredProducts': 'المنتجات المميزة',
       'home.shopByCategory': 'تسوق حسب الفئة',
       'home.contactUs': 'اتصل بنا',
+      'home.mostPopular': 'المنتجات الأكثر شهرة',
+      'pagination.previous': 'السابق',
+      'pagination.next': 'التالي',
+      'pagination.page': 'الصفحة',
+      'pagination.of': 'من',
      // Footer
       'footer_description': 'موقع تسوق إلكتروني موثوق به لمنتجات عالية الجودة وخدمة ممتازة.',
       'quick_links': 'الروابط السريعة',
