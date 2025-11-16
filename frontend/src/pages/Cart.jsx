@@ -77,7 +77,7 @@ export default function Cart() {
 
         <div className="lg:col-span-1">
           <Card className="p-6 sticky top-24">
-            <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+            <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">{t('cart.subtotal')}</span>

@@ -31,7 +31,7 @@ export default function Register() {
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     registerMutation.mutate();
   };
@@ -80,7 +80,7 @@ export default function Register() {
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{' '}
+          {t('auth.haveAccount')}{' '}
           <Link to="/login" className="text-blue-600 hover:underline" data-testid="login-link">
             {t('auth.login')}
           </Link>

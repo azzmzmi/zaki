@@ -49,11 +49,11 @@ export default function AdminProducts() {
       i18n.addResource('ar', 'translation', `entity.product.${product.id}.name`, formData.name_ar || product.name);
       i18n.addResource('en', 'translation', `entity.product.${product.id}.description`, product.description);
       i18n.addResource('ar', 'translation', `entity.product.${product.id}.description`, formData.description_ar || product.description);
-      toast.success('Product created');
+      toast.success(t('product.created'));
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       handleCloseDialog();
     },
-    onError: () => toast.error('Failed to create product')
+    onError: () => toast.error(t('product.createFailed'))
   });
 
   const updateMutation = useMutation({
@@ -66,20 +66,20 @@ export default function AdminProducts() {
       i18n.addResource('ar', 'translation', `entity.product.${product.id}.name`, formData.name_ar || product.name);
       i18n.addResource('en', 'translation', `entity.product.${product.id}.description`, product.description);
       i18n.addResource('ar', 'translation', `entity.product.${product.id}.description`, formData.description_ar || product.description);
-      toast.success('Product updated');
+      toast.success(t('product.updated'));
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       handleCloseDialog();
     },
-    onError: () => toast.error('Failed to update product')
+    onError: () => toast.error(t('product.updateFailed'))
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => productsApi.delete(id),
     onSuccess: () => {
-      toast.success('Product deleted');
+      toast.success(t('product.deleted'));
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
     },
-    onError: () => toast.error('Failed to delete product')
+    onError: () => toast.error(t('product.deleteFailed'))
   });
 
   const handleOpenDialog = async (product) => {
@@ -134,9 +134,9 @@ export default function AdminProducts() {
     try {
       const response = await uploadApi.upload(file);
       setFormData({ ...formData, image_url: response.data.url });
-      toast.success('Image uploaded');
+      toast.success(t('product.imageUploaded'));
     } catch (error) {
-      toast.error('Failed to upload image');
+      toast.error(t('product.uploadImageFailed'));
     } finally {
       setUploading(false);
     }
@@ -199,38 +199,38 @@ export default function AdminProducts() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent data-testid="product-dialog">
             <DialogHeader>
-              <DialogTitle>{editingProduct ? 'Edit Product' : t('admin.addProduct')}</DialogTitle>
+              <DialogTitle>{editingProduct ? t('product.editTitle') : t('admin.addProduct')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Name *</Label>
+                <Label>{t('product.name')} {t('form.required')}</Label>
                 <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required data-testid="product-name-input" />
               </div>
               <div>
-                <Label>Description *</Label>
+                <Label>{t('product.description')} {t('form.required')}</Label>
                 <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required data-testid="product-description-input" />
               </div>
               <div>
-                <Label>Arabic Name</Label>
+                <Label>{t('product.arabicName')}</Label>
                 <Input dir="rtl" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} data-testid="product-ar-name-input" />
               </div>
               <div>
-                <Label>Arabic Description</Label>
+                <Label>{t('product.arabicDescription')}</Label>
                 <Textarea dir="rtl" value={formData.description_ar} onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} data-testid="product-ar-description-input" />
               </div>
               <div>
-                <Label>Price *</Label>
+                <Label>{t('product.price')} {t('form.required')}</Label>
                 <Input type="number" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required data-testid="product-price-input" />
               </div>
               <div>
-                <Label>Stock *</Label>
+                <Label>{t('product.stock')} {t('form.required')}</Label>
                 <Input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} required data-testid="product-stock-input" />
               </div>
               <div>
-                <Label>Category *</Label>
+                <Label>{t('product.category')} {t('form.required')}</Label>
                 <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })} required>
                   <SelectTrigger data-testid="product-category-select">
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('product.categorySelect')} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories?.map((cat) => (
@@ -240,10 +240,10 @@ export default function AdminProducts() {
                 </Select>
               </div>
               <div>
-                <Label>Image</Label>
+                <Label>{t('product.image')}</Label>
                 <div className="flex gap-2">
                   <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} data-testid="product-image-input" />
-                  {uploading && <span className="text-sm">Uploading...</span>}
+                  {uploading && <span className="text-sm">{t('product.uploading')}</span>}
                 </div>
                 {formData.image_url && <img src={getImageUrl(formData.image_url)} alt="Preview" className="mt-2 w-24 h-24 object-cover rounded" />}
               </div>

@@ -38,11 +38,11 @@ export default function AdminCategories() {
       i18n.addResource('ar', 'translation', `entity.category.${category.id}.name`, formData.name_ar || category.name);
       i18n.addResource('en', 'translation', `entity.category.${category.id}.description`, category.description || '');
       i18n.addResource('ar', 'translation', `entity.category.${category.id}.description`, formData.description_ar || category.description || '');
-      toast.success('Category created');
+      toast.success(t('category.created'));
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       handleCloseDialog();
     },
-    onError: () => toast.error('Failed to create category')
+    onError: () => toast.error(t('category.createFailed'))
   });
 
   const updateMutation = useMutation({
@@ -56,20 +56,20 @@ export default function AdminCategories() {
       i18n.addResource('ar', 'translation', `entity.category.${category.id}.name`, formData.name_ar || category.name);
       i18n.addResource('en', 'translation', `entity.category.${category.id}.description`, category.description || '');
       i18n.addResource('ar', 'translation', `entity.category.${category.id}.description`, formData.description_ar || category.description || '');
-      toast.success('Category updated');
+      toast.success(t('category.updated'));
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       handleCloseDialog();
     },
-    onError: () => toast.error('Failed to update category')
+    onError: () => toast.error(t('category.updateFailed'))
   });
 
   const deleteMutation = useMutation({
   mutationFn: (id) => categoriesApi.delete(id),
     onSuccess: () => {
-      toast.success('Category deleted');
+      toast.success(t('category.deleted'));
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
     },
-    onError: () => toast.error('Failed to delete category')
+    onError: () => toast.error(t('category.deleteFailed'))
   }); 
 
   const handleOpenDialog = async (category) => {
@@ -151,23 +151,23 @@ export default function AdminCategories() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent data-testid="category-dialog">
             <DialogHeader>
-              <DialogTitle>{editingCategory ? 'Edit Category' : t('admin.addCategory')}</DialogTitle>
+              <DialogTitle>{editingCategory ? t('category.editTitle') : t('admin.addCategory')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>Name *</Label>
+                <Label>{t('category.name')} {t('form.required')}</Label>
                 <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required data-testid="category-name-input" />
               </div>
               <div>
-                <Label>Description</Label>
+                <Label>{t('category.description')}</Label>
                 <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} data-testid="category-description-input" />
               </div>
               <div>
-                <Label>Arabic Name</Label>
+                <Label>{t('category.arabicName')}</Label>
                 <Input dir="rtl" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} data-testid="category-ar-name-input" />
               </div>
               <div>
-                <Label>Arabic Description</Label>
+                <Label>{t('category.arabicDescription')}</Label>
                 <Textarea dir="rtl" value={ formData.description_ar } onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} data-testid="category-ar-description-input" />
               </div>
               <div className="flex gap-2 justify-end">

@@ -48,7 +48,7 @@ export default function Products() {
         price: product.price,
         image_url: product.image_url
       });
-      toast.success(`${t(`entity.product.${product.id}.name`, { defaultValue: product.name })} added to cart`);
+      toast.success(`${t(`entity.product.${product.id}.name`, { defaultValue: product.name })} ${t('cart.addedToCart')}`);
     }
   };
 

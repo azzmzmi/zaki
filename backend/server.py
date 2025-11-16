@@ -190,6 +190,24 @@ class TranslationCreate(BaseModel):
     type: Optional[str] = None
     ref_id: Optional[str] = None
 
+# Theme Models
+class ThemeSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: "theme_config")
+    primary_color: str = "#2563eb"  # blue-600
+    secondary_color: str = "#4f46e5"  # indigo-600
+    accent_color: str = "#dc2626"  # red-600
+    font_size: str = "base"  # base, sm, lg
+    border_radius: str = "md"  # sm, md, lg
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ThemeSettingsUpdate(BaseModel):
+    primary_color: Optional[str] = None
+    secondary_color: Optional[str] = None
+    accent_color: Optional[str] = None
+    font_size: Optional[str] = None
+    border_radius: Optional[str] = None
+
 # Helper functions
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -474,16 +492,51 @@ async def delete_category(category_id: str, admin: User = Depends(require_admin)
 # Product Routes
 @api_router.get("/products", response_model=List[Product])
 async def get_products(category_id: Optional[str] = None, search: Optional[str] = None):
+    # First, get all products matching category and basic search
     query = {}
     if category_id:
         query["category_id"] = category_id
+    
+    # If search term provided, we need to search both product DB and translations
     if search:
-        query["$or"] = [
+        product_ids_from_search = set()
+        
+        # Search in products collection (English names/descriptions)
+        search_query = query.copy()
+        search_query["$or"] = [
             {"name": {"$regex": search, "$options": "i"}},
             {"description": {"$regex": search, "$options": "i"}}
         ]
+        english_results = await db.products.find(search_query, {"_id": 0, "id": 1}).to_list(1000)
+        for prod in english_results:
+            product_ids_from_search.add(prod["id"])
+        
+        # Search in translations collection (Arabic names/descriptions)
+        translation_query = {
+            "key": {"$regex": "entity.product.", "$options": "i"},
+            "$or": [
+                {"ar": {"$regex": search, "$options": "i"}},
+            ]
+        }
+        arabic_results = await db.translations.find(translation_query, {"_id": 0, "key": 1}).to_list(1000)
+        for trans in arabic_results:
+            # Extract product ID from key like "entity.product.{id}.name"
+            key_parts = trans["key"].split(".")
+            if len(key_parts) >= 3 and key_parts[0] == "entity" and key_parts[1] == "product":
+                product_ids_from_search.add(key_parts[2])
+        
+        # Now get the actual products with IDs from both searches
+        if product_ids_from_search:
+            products = await db.products.find(
+                {"id": {"$in": list(product_ids_from_search)}, **({"category_id": category_id} if category_id else {})},
+                {"_id": 0}
+            ).to_list(1000)
+        else:
+            products = []
+    else:
+        # No search term, just filter by category
+        products = await db.products.find(query, {"_id": 0}).to_list(1000)
     
-    products = await db.products.find(query, {"_id": 0}).to_list(1000)
     for prod in products:
         if isinstance(prod['created_at'], str):
             prod['created_at'] = datetime.fromisoformat(prod['created_at'])
@@ -553,10 +606,22 @@ async def upsert_translation(entry: TranslationCreate, admin: User = Depends(req
 async def get_orders(current_user: User = Depends(get_current_user)):
     query = {} if current_user.role == UserRole.ADMIN else {"user_id": current_user.id}
     orders = await db.orders.find(query, {"_id": 0}).to_list(1000)
+    result = []
     for order in orders:
-        if isinstance(order['created_at'], str):
-            order['created_at'] = datetime.fromisoformat(order['created_at'])
-    return orders
+        try:
+            if isinstance(order.get('created_at'), str):
+                order['created_at'] = datetime.fromisoformat(order['created_at'])
+            # Skip orders with invalid shipping_address (string instead of object)
+            if isinstance(order.get('shipping_address'), str):
+                logger.warning(f"Skipping order {order.get('id')} with invalid shipping_address")
+                continue
+            # Ensure all required fields are present
+            if all(key in order for key in ['id', 'user_id', 'items', 'total', 'shipping_address', 'created_at']):
+                result.append(order)
+        except Exception as e:
+            logger.error(f"Error processing order {order.get('id')}: {str(e)}")
+            continue
+    return result
 
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str, current_user: User = Depends(get_current_user)):
@@ -618,15 +683,103 @@ async def get_analytics(admin: User = Depends(require_admin)):
     total_products = await db.products.count_documents({})
     total_orders = await db.orders.count_documents({})
     
-    orders = await db.orders.find({}, {"_id": 0, "total": 1}).to_list(10000)
+    orders = await db.orders.find({}, {"_id": 0, "total": 1, "created_at": 1, "status": 1, "items": 1}).to_list(10000)
+    
+    # Convert string dates to datetime objects
+    for order in orders:
+        if isinstance(order['created_at'], str):
+            order['created_at'] = datetime.fromisoformat(order['created_at'])
+    
     total_sales = sum(order['total'] for order in orders)
+    
+    # Get recent orders (last 30 days)
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    recent_orders = [order for order in orders if order['created_at'] >= thirty_days_ago]
+    recent_sales = sum(order['total'] for order in recent_orders)
+    
+    # Order status breakdown
+    status_breakdown = {}
+    for order in orders:
+        status = order.get('status', 'pending')
+        status_breakdown[status] = status_breakdown.get(status, 0) + 1
+    
+    # Sales by day for chart (last 7 days)
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    daily_sales = {}
+    for order in orders:
+        if order['created_at'] >= seven_days_ago:
+            date_key = order['created_at'].strftime('%Y-%m-%d')
+            daily_sales[date_key] = daily_sales.get(date_key, 0) + order['total']
+    
+    # Top selling products
+    product_sales = {}
+    for order in orders:
+        for item in order.get('items', []):
+            product_id = item.get('product_id')
+            quantity = item.get('quantity', 0)
+            product_sales[product_id] = product_sales.get(product_id, 0) + quantity
+    
+    # Get top 5 products by quantity sold
+    top_products = sorted(product_sales.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    # Get product details for top products
+    top_product_details = []
+    for product_id, quantity in top_products:
+        product = await db.products.find_one({"id": product_id}, {"_id": 0, "name": 1})
+        if product:
+            top_product_details.append({
+                "name": product.get('name', 'Unknown'),
+                "quantity": quantity
+            })
     
     return {
         "total_users": total_users,
         "total_products": total_products,
         "total_orders": total_orders,
-        "total_sales": total_sales
+        "total_sales": total_sales,
+        "recent_sales": recent_sales,  # Sales in last 30 days
+        "status_breakdown": status_breakdown,
+        "daily_sales": daily_sales,
+        "top_products": top_product_details
     }
+
+# Theme Settings Routes
+@api_router.get("/theme", response_model=ThemeSettings)
+async def get_theme():
+    theme = await db.theme_settings.find_one({"id": "theme_config"}, {"_id": 0})
+    if not theme:
+        # Return default theme
+        return ThemeSettings()
+    if isinstance(theme['updated_at'], str):
+        theme['updated_at'] = datetime.fromisoformat(theme['updated_at'])
+    return ThemeSettings(**theme)
+
+@api_router.put("/theme", response_model=ThemeSettings)
+async def update_theme(theme_data: ThemeSettingsUpdate, admin: User = Depends(require_admin)):
+    update_dict = {}
+    if theme_data.primary_color:
+        update_dict['primary_color'] = theme_data.primary_color
+    if theme_data.secondary_color:
+        update_dict['secondary_color'] = theme_data.secondary_color
+    if theme_data.accent_color:
+        update_dict['accent_color'] = theme_data.accent_color
+    if theme_data.font_size:
+        update_dict['font_size'] = theme_data.font_size
+    if theme_data.border_radius:
+        update_dict['border_radius'] = theme_data.border_radius
+    
+    update_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    await db.theme_settings.update_one(
+        {"id": "theme_config"},
+        {"$set": update_dict},
+        upsert=True
+    )
+    
+    updated = await db.theme_settings.find_one({"id": "theme_config"}, {"_id": 0})
+    if isinstance(updated['updated_at'], str):
+        updated['updated_at'] = datetime.fromisoformat(updated['updated_at'])
+    return ThemeSettings(**updated)
 
 # File Upload
 @api_router.post("/upload")
