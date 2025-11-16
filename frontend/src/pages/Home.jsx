@@ -1,22 +1,47 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowRight, ShoppingBag, TrendingUp, Shield } from 'lucide-react';
+import { ArrowRight, ShoppingBag, TrendingUp, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productsApi, categoriesApi } from '@/lib/api';
 import { getImageUrl } from '@/lib/imageUtils';
 
 export default function Home() {
   const { t } = useTranslation();
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 24;
   
-  const { data: products } = useQuery({
-    queryKey: ['featured-products'],
+  const { data: allProducts } = useQuery({
+    queryKey: ['homepage-products'],
     queryFn: async () => {
       const response = await productsApi.getAll();
-      return response.data.slice(0, 4);
+      // Sort by stock (most popular)
+      return (response.data || []).sort((a, b) => b.stock - a.stock);
     }
   });
+
+  // Calculate pagination
+  const totalProducts = allProducts?.length || 0;
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const products = allProducts?.slice(startIndex, endIndex) || [];
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const { data: categories } = useQuery({
     queryKey: ['categories-home'],
@@ -29,7 +54,7 @@ export default function Home() {
   return (
     <div className="min-h-screen" data-testid="home-page">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 overflow-hidden">
+    {/*   <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-3xl" />
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center space-y-6">
@@ -52,9 +77,9 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* Categories */}
+{/*       {/* Categories 
       {categories && categories.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
@@ -80,10 +105,11 @@ export default function Home() {
             </div>
           </div>
         </section>
-      )}
+      )} */}  
+
 
       {/* Features */}
-      <section className="py-16 px-4">
+  {/*     <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-500" data-testid="feature-shipping">
@@ -103,16 +129,16 @@ export default function Home() {
             </Card>
           </div>
         </div>
-      </section>
+      </section> */}
       
 
       {/* Featured Products */}
       {products && products.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
-              {t('home.featuredProducts')}
-            </h2>
+{/*             <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
+              {t('home.mostPopular')}
+            </h2> */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link key={product.id} to={`/products/${product.id}`}>
@@ -132,6 +158,39 @@ export default function Home() {
                 </Link>
               ))}
             </div>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-12">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className="gap-2"
+                  data-testid="prev-page-button"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('pagination.previous')}
+                </Button>
+                
+                <div className="flex items-center gap-2" data-testid="pagination-info">
+                  <span className="text-sm font-medium">
+                    {t('pagination.page')} {currentPage} {t('pagination.of')} {totalPages}
+                  </span>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="gap-2"
+                  data-testid="next-page-button"
+                >
+                  {t('pagination.next')}
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       )}

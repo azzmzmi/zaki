@@ -7,7 +7,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full bg-gradient-to-r from-slate-900 to-blue-900 dark:from-black dark:to-slate-900 text-white mt-16">
+    <footer className="w-full bg-gradient-to-r from-amber-900 via-orange-800 to-yellow-700 dark:from-amber-900 dark:via-orange-800 dark:to-yellow-800 text-white mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
@@ -62,7 +62,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-gray-700 my-8"></div>
+        <div className="border-t border-white/20 my-8"></div>
 
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">

@@ -19,6 +19,7 @@ export default function Products() {
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [sortBy, setSortBy] = useState('newest');
   const addItem = useCartStore(state => state.addItem);
 
   const { data: categories } = useQuery({
@@ -30,13 +31,39 @@ export default function Products() {
   });
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ['products', selectedCategory, search],
+    queryKey: ['products', selectedCategory, search, sortBy],
     queryFn: async () => {
       const response = await productsApi.getAll(
         selectedCategory === 'all' ? undefined : selectedCategory,
         search || undefined
       );
-      return response.data;
+      let sortedProducts = response.data || [];
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'price-asc':
+          sortedProducts.sort((a, b) => a.price - b.price);
+          break;
+        case 'price-desc':
+          sortedProducts.sort((a, b) => b.price - a.price);
+          break;
+        case 'popular':
+          // Sort by stock (assuming more stock = more popular, or could use sales count if available)
+          sortedProducts.sort((a, b) => b.stock - a.stock);
+          break;
+        case 'stock':
+          sortedProducts.sort((a, b) => b.stock - a.stock);
+          break;
+        case 'newest':
+        default:
+          // If created_at exists, sort by that, otherwise keep original order
+          if (sortedProducts.length > 0 && sortedProducts[0].created_at) {
+            sortedProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          }
+          break;
+      }
+
+      return sortedProducts;
     }
   });
 
@@ -56,7 +83,7 @@ export default function Products() {
     <div className="max-w-7xl mx-auto px-4 py-8" data-testid="products-page">
       <h1 className="text-4xl font-bold mb-8" data-testid="products-title">{t('products.title')}</h1>
 
-      {/* Filters */}
+      {/* Filters and Sorting */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -77,6 +104,18 @@ export default function Products() {
             {categories?.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>{t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-full sm:w-[220px]" data-testid="sort-filter">
+            <SelectValue placeholder={t('products.sortBy')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">{t('products.sortNewest')}</SelectItem>
+            <SelectItem value="price-asc">{t('products.sortPriceAsc')}</SelectItem>
+            <SelectItem value="price-desc">{t('products.sortPriceDesc')}</SelectItem>
+            <SelectItem value="popular">{t('products.sortPopular')}</SelectItem>
+            <SelectItem value="stock">{t('products.sortStock')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
