@@ -17,6 +17,6 @@ export const CONTACT_INFO = {
     facebook: '#',
     whatsapp: 'https://wa.me/',
     instagram: '#',
-    linkedin: '#'
+    tiktok: '#'
   }
 };

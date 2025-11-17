@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { categoriesApi, translationsApi, uploadApi } from '@/lib/api';
+import { getImageUrl } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Upload } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
@@ -108,9 +109,9 @@ export default function AdminCategories() {
     try {
       const response = await uploadApi.upload(file);
       setFormData({ ...formData, image_url: response.data.url });
-      toast.success(t('category.imageUploaded') || 'Image uploaded successfully');
+      toast.success(t('category.imageUploaded'));
     } catch (error) {
-      toast.error(t('category.imageUploadFailed') || 'Failed to upload image');
+      toast.error(t('category.imageUploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -147,12 +148,24 @@ export default function AdminCategories() {
           <div className="grid gap-4">
             {categories?.map((category) => (
               <Card key={category.id} className="p-4" data-testid={`category-row-${category.id}`}>
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center gap-4 justify-between">
+                  {/* Category Image */}
+                  {category.image_url && (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={getImageUrl(category.image_url)}
+                        alt={category.name}
+                        className="h-20 w-20 object-contain rounded"
+                      />
+                    </div>
+                  )}
+                  {/* Category Info */}
+                  <div className="flex-1">
                     <h3 className="font-semibold text-lg" data-testid={`category-name-${category.id}`}>{t(`entity.category.${category.id}.name`, { defaultValue: category.name })}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t(`entity.category.${category.id}.description`, { defaultValue: category.description })  }</p>
                   </div>
-                  <div className="flex gap-2">
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 flex-shrink-0">
                     <Button variant="outline" size="sm" onClick={() => handleOpenDialog(category)} data-testid={`edit-category-${category.id}`}>
                       <Pencil className="w-4 h-4" />
                     </Button>
@@ -208,11 +221,12 @@ export default function AdminCategories() {
                     disabled={uploading}
                   >
                     <Upload className="w-4 h-4" />
-                    {uploading ? 'Uploading...' : 'Upload Image'}
+                    {uploading ? t('category.imageUploading') : t('category.uploadImageButton')}
                   </Button>
                   {formData.image_url && (
-                    <div className="mt-2">
-                      <img src={formData.image_url} alt="Category preview" className="max-h-32 max-w-32 object-contain" />
+                    <div className="mt-4">
+                      <p className="text-sm font-medium mb-2">{t('category.imagePreview')}</p>
+                      <img src={getImageUrl(formData.image_url)} alt="Category preview" className="max-h-40 max-w-full object-contain rounded border border-gray-200 dark:border-gray-700" />
                     </div>
                   )}
                 </div>

@@ -15,6 +15,7 @@ import {
 import { Trash2, Upload, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { getImageUrl } from '@/lib/imageUtils';
 
 export default function AdminPartners() {
   const { t } = useTranslation();
@@ -131,7 +132,7 @@ export default function AdminPartners() {
               >
                 <div className="flex-1 p-4 flex items-center justify-center bg-white dark:bg-gray-800 min-h-[200px]">
                   <img
-                    src={partner.logo_url}
+                    src={getImageUrl(partner.logo_url)}
                     alt={partner.name}
                     className="max-h-40 max-w-40 object-contain"
                   />
@@ -148,7 +149,7 @@ export default function AdminPartners() {
                     data-testid={`delete-partner-${partner.id}`}
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete
+                    {t('partner.deleteButton')}
                   </Button>
                 </div>
               </Card>
@@ -219,7 +220,7 @@ export default function AdminPartners() {
               </div>
               {formData.file && (
                 <p className="text-sm text-gray-500 mt-2">
-                  Selected: {formData.file.name}
+                  {t('partner.selectedFile')} {formData.file.name}
                 </p>
               )}
             </div>

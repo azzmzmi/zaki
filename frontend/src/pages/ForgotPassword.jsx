@@ -28,10 +28,10 @@ export default function ForgotPassword() {
     onSuccess: (data) => {
       setResetToken(data.token);
       setStep('reset');
-      toast.success(t('auth.resetEmailSent') || 'Password reset link sent to your email');
+      toast.success(t('auth.resetEmailSent'));
     },
     onError: (error) => {
-      toast.error(error.response?.data?.detail || t('auth.emailNotFound') || 'Email not found');
+      toast.error(error.response?.data?.detail || t('auth.emailNotFound'));
     }
   });
 
@@ -48,14 +48,14 @@ export default function ForgotPassword() {
       return response.data;
     },
     onSuccess: () => {
-      toast.success(t('auth.passwordResetSuccess') || 'Password reset successfully');
+      toast.success(t('auth.resetPasswordSuccess'));
       navigate('/login');
     },
     onError: (error) => {
       if (error.message.includes('do not match')) {
-        toast.error(t('auth.passwordMismatch') || 'Passwords do not match');
+        toast.error(t('auth.passwordMismatch'));
       } else {
-        toast.error(error.response?.data?.detail || t('auth.resetFailed') || 'Failed to reset password');
+        toast.error(error.response?.data?.detail || t('auth.resetFailed'));
       }
     }
   });
@@ -63,7 +63,7 @@ export default function ForgotPassword() {
   const handleRequestReset = (e) => {
     e.preventDefault();
     if (!email) {
-      toast.error(t('auth.emailRequired') || 'Email is required');
+      toast.error(t('auth.emailRequired'));
       return;
     }
     requestResetMutation.mutate();
@@ -72,7 +72,7 @@ export default function ForgotPassword() {
   const handleResetPassword = (e) => {
     e.preventDefault();
     if (!newPassword || !confirmPassword) {
-      toast.error(t('auth.allFieldsRequired') || 'All fields are required');
+      toast.error(t('auth.allFieldsRequired'));
       return;
     }
     resetPasswordMutation.mutate();
@@ -82,7 +82,7 @@ export default function ForgotPassword() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <Card className="w-full max-w-md p-8">
         <h1 className="text-3xl font-bold mb-6 text-center">
-          {t('auth.forgotPassword') || 'Forgot Password'}
+          {t('auth.forgotPassword')}
         </h1>
 
         {step === 'email' ? (
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('auth.enterYourEmail') || 'Enter your email'}
+                placeholder={t('auth.enterYourEmail')}
                 required
               />
             </div>
@@ -105,32 +105,32 @@ export default function ForgotPassword() {
               disabled={requestResetMutation.isPending}
             >
               {requestResetMutation.isPending
-                ? t('common.sending') || 'Sending...'
-                : t('auth.sendResetLink') || 'Send Reset Link'}
+                ? t('common.sending')
+                : t('auth.sendResetLink')}
             </Button>
           </form>
         ) : (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg mb-4">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                {t('auth.resetLinkSent') || 'Password reset link has been sent to your email. Please check your email for the token.'}
+                {t('auth.resetLinkSent')}
               </p>
             </div>
 
             <div>
-              <Label htmlFor="newPassword">{t('profile.newPassword') || 'New Password'}</Label>
+              <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
               <Input
                 id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder={t('profile.enterNewPassword') || 'Enter new password'}
+                placeholder={t('auth.enterNewPassword')}
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword">{t('profile.confirmPassword') || 'Confirm Password'}</Label>
+              <Label htmlFor="confirmPassword">{t('profile.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -147,14 +147,14 @@ export default function ForgotPassword() {
               disabled={resetPasswordMutation.isPending}
             >
               {resetPasswordMutation.isPending
-                ? t('common.resetting') || 'Resetting...'
-                : t('auth.resetPassword') || 'Reset Password'}
+                ? t('common.resetting')
+                : t('auth.resetPassword')}
             </Button>
           </form>
         )}
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-          {t('auth.rememberedPassword') || 'Remembered your password?'}{' '}
+          {t('auth.rememberedPassword')}{' '}
           <Link to="/login" className="text-blue-600 hover:underline">
             {t('auth.login')}
           </Link>
