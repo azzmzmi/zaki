@@ -1,17 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, User, LogOut, Globe } from "lucide-react";
+import { ShoppingCart, User, LogOut, Globe, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import ThemeSwitcher from "./ThemeSwitcher";
-import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -30,89 +30,74 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50"
-      data-testid="main-navbar"
-    >
+    <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center">
+          {/* Logo */}
+          <Link to="/" className="flex items-center flex-shrink-0">
             <img
               src={process.env.PUBLIC_URL + "/logo.png"}
               alt="Your Store"
-              className="h-12 w-auto"
+              className="h-10 sm:h-12 w-auto"
             />
-            <br/>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {" "}{t("app.name")}
+            <span className="text-2xl font-bold ml-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              {t("app.name")}
             </span>
           </Link>
 
-          <div className="flex items-center space-x-4">
-            <Link to="/products" data-testid="products-link">
+          {/* Desktop buttons */}
+          <div className="hidden sm:flex items-center space-x-4">
+            {/* Products */}
+            <Link to="/products">
               <Button variant="ghost">{t("nav.products")}</Button>
             </Link>
 
+            {/* Admin */}
             {isAuthenticated() && isAdmin() && (
-              <Link to="/admin" data-testid="admin-link">
+              <Link to="/admin">
                 <Button variant="ghost">{t("nav.admin")}</Button>
               </Link>
             )}
 
-            <Link to="/cart" className="relative" data-testid="cart-link">
+            {/* Cart */}
+            <Link to="/cart" className="relative">
               <Button variant="ghost" size="icon">
                 <ShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (
-                  <span
-                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center"
-                    data-testid="cart-badge"
-                  >
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
               </Button>
             </Link>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              data-testid="theme-toggle"
-            >
+            {/* Theme toggle */}
+            <Button variant="ghost" size="icon">
               <ThemeSwitcher />
             </Button>
 
+            {/* Language */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="language-menu">
+                <Button variant="ghost" size="icon">
                   <Globe className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => changeLanguage("en")}
-                  data-testid="lang-en"
-                >
+                <DropdownMenuItem onClick={() => changeLanguage("en")}>
                   English
                 </DropdownMenuItem>
-{/*                 <DropdownMenuItem
-                  onClick={() => changeLanguage("es")}
-                  data-testid="lang-es"
-                >
-                  Español
-                </DropdownMenuItem> */}
-                <DropdownMenuItem
-                  onClick={() => changeLanguage("ar")}
-                  data-testid="lang-ar"
-                >
+                <DropdownMenuItem onClick={() => changeLanguage("ar")}>
                   عربي
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* User */}
             {isAuthenticated() ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" data-testid="user-menu">
+                  <Button variant="ghost" size="icon">
                     <User className="w-5 h-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -121,25 +106,112 @@ export default function Navbar() {
                     {user?.full_name}
                   </div>
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" data-testid="profile-link">
-                      <User className="w-4 h-4 mr-2" />
-                      {t("profile.title")}
-                    </Link>
+                    <Link to="/profile">{t("profile.title")}</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    data-testid="logout-button"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
+                  <DropdownMenuItem onClick={handleLogout}>
                     {t("nav.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link to="/login" data-testid="login-link">
+              <Link to="/login">
                 <Button>{t("nav.login")}</Button>
               </Link>
             )}
+          </div>
+
+          {/* Mobile grouped menu */}
+          <div className="flex sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="end" className="w-56">
+                {/* Main Links */}
+                <DropdownMenuItem asChild>
+                  <Link to="/products">{t("nav.products")}</Link>
+                </DropdownMenuItem>
+
+                {isAuthenticated() && isAdmin() && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">{t("nav.admin")}</Link>
+                  </DropdownMenuItem>
+                )}
+
+                <DropdownMenuItem asChild>
+                  <Link to="/cart">{t("nav.cart")}</Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Settings Section */}
+                <div className="px-3 py-2">
+                  <span className="text-gray-500 text-sm font-semibold">
+                    {t("nav.settings")}
+                  </span>
+
+                  {/* Theme toggle */}
+                  <div className="mt-2 flex items-center justify-between">
+                    <span>{t("nav.theme")}</span>
+                    <ThemeSwitcher />
+                  </div>
+
+                  {/* Language toggle */}
+                  {/* Language toggle like Theme */}
+                  <div className="mt-2 flex items-center justify-between">
+                    <span>{t("nav.language")}</span>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {i18n.language === "en" ? "English" : "عربي"}
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent
+                        side="bottom"
+                        align="end"
+                        className="w-32 p-0"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => changeLanguage("en")}
+                          className="text-sm px-3 py-2"
+                        >
+                          English
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => changeLanguage("ar")}
+                          className="text-sm px-3 py-2"
+                        >
+                          عربي
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+
+                {/* User Actions */}
+                <div className="px-3 py-2">
+                  {isAuthenticated() ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/profile">{t("profile.title")}</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        {t("nav.logout")}
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem asChild>
+                      <Link to="/login">{t("nav.login")}</Link>
+                    </DropdownMenuItem>
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

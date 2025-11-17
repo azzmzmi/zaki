@@ -1,16 +1,18 @@
-import { Sun, Moon, Monitor } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { Sun, Moon, Monitor } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -28,25 +30,25 @@ export default function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuCheckboxItem
-          checked={theme === 'light'}
-          onCheckedChange={() => setTheme('light')}
+          checked={theme === "light"}
+          onCheckedChange={() => setTheme("light")}
         >
           <Sun className="mr-2 h-4 w-4" />
-          <span>Light</span>
+          <span>{t("nav.theme.light")}</span>
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
-          checked={theme === 'dark'}
-          onCheckedChange={() => setTheme('dark')}
+          checked={theme === "dark"}
+          onCheckedChange={() => setTheme("dark")}
         >
           <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
+          <span>{t("nav.theme.dark")}</span>
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
-          checked={theme === 'system'}
-          onCheckedChange={() => setTheme('system')}
+          checked={theme === "system"}
+          onCheckedChange={() => setTheme("system")}
         >
           <Monitor className="mr-2 h-4 w-4" />
-          <span>System</span>
+          <span>{t("nav.theme.system")}</span>
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -32,6 +32,13 @@ const resources = {
       'nav.login': 'Login',
       'nav.register': 'Register',
       'nav.logout': 'Logout',
+      'nav.settings': 'Settings',
+      'nav.theme': 'Theme',
+      'nav.theme.light': 'Light',
+      'nav.theme.dark': 'Dark',
+      'nav.theme.system': 'System',
+      'nav.language': 'Language',
+      
       
       // Auth
       'auth.login': 'Login',
@@ -233,6 +240,7 @@ const resources = {
       'category.deleteFailed': 'Failed to delete category',
       'category.editTitle': 'Edit Category',
       'category.required': '*',
+      'category.image': 'Category Image',
       
       // Checkout Form - Additional fields
       'checkout.fillAllFields': 'Please fill in all address fields',
@@ -258,6 +266,7 @@ const resources = {
       'profile.customer': 'Customer',
       'profile.admin': 'Admin',
       'profile.editUser': 'Edit User',
+      'profile.title': 'My Profile',
       
       // Form Validation
       'form.required': '*',
@@ -451,6 +460,13 @@ const resources = {
       'nav.login': 'تسجيل الدخول',
       'nav.register': 'التسجيل',
       'nav.logout': 'تسجيل الخروج',
+      'nav.settings': 'الإعدادات',
+      'nav.theme': 'المظهر',
+      'nav.theme.light': 'فاتح',
+      'nav.theme.dark': 'داكن',
+      'nav.theme.system': 'النظام',
+      'nav.language': 'اللغة',
+
       
       // Auth
       'auth.login': 'تسجيل الدخول',
@@ -650,6 +666,7 @@ const resources = {
       'category.deleteFailed': 'فشل حذف الفئة',
       'category.editTitle': 'تعديل الفئة',
       'category.required': '*',
+      'category.image': 'صورة الفئة',
       
       // Checkout Form
       'checkout.fillAllFields': 'الرجاء ملء جميع حقول عنوان الشحن',
