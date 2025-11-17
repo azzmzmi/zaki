@@ -23,6 +23,7 @@ import AdminCategories from './pages/admin/Categories';
 import AdminOrders from './pages/admin/Orders';
 import AdminUsers from './pages/admin/Users';
 import AdminTheme from './pages/admin/Theme';
+import Partners from './pages/admin/Partners';
 import Profile from './pages/Profile';
 import { useAuthStore } from './store/authStore';
 
@@ -135,6 +136,11 @@ function App() {
                 <Route path="/admin/theme" element={
                   <ProtectedRoute adminOnly>
                     <AdminTheme />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/partners" element={
+                  <ProtectedRoute adminOnly>
+                    <Partners />
                   </ProtectedRoute>
                 } />
               </Routes>
