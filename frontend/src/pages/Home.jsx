@@ -67,73 +67,58 @@ export default function Home() {
 
       {/* Category Section */}
       {categories && categories.length > 0 && (
-        <section className="py-16 px-4">
+        <section className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
           <div className="max-w-7xl mx-auto">
-            {/* UPDATED RESPONSIVE GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
-                            gap-4 sm:gap-6">
+   {/*          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              {t('home.shopByCategory', { defaultValue: 'Shop by Category' })}
+            </h2> */}
+            {/* Responsive Grid Layout */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {categories.map((cat) => (
                 <Link key={cat.id} to={`/products?category=${cat.id}`}>
                   <Card
-                    className="overflow-hidden group relative h-64 rounded-xl 
-                               bg-gradient-to-br from-slate-50 to-slate-100 
-                               dark:from-slate-800 dark:to-slate-900 
-                               hover:shadow-2xl transition-all duration-300 
-                               flex flex-col shadow-md"
+                    className="overflow-hidden group relative h-72 rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700"
                     data-testid={`category-card-${cat.id}`}
                   >
-                    <div className="flex-1 p-6 flex flex-col justify-start relative z-10">
-                      <h3
-                        className="text-2xl font-bold bg-gradient-to-r 
-                                   from-blue-600 to-indigo-600 bg-clip-text 
-                                   text-transparent mb-2 
-                                   group-hover:from-blue-700 group-hover:to-indigo-700 
-                                   transition-all"
-                        data-testid={`category-name-${cat.id}`}
-                      >
-                        {t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}
-                      </h3>
+                    {/* Card Background - Solid Color */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600" />
+                    
+                    {/* Content Section - Top */}
+                    <div className="relative z-20 p-6 pb-0 flex flex-col h-full">
+                      <div className="flex-1">
+                        <h3
+                          className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                          data-testid={`category-name-${cat.id}`}
+                        >
+                          {t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}
+                        </h3>
 
-                      <p
-                        className="text-sm text-gray-600 dark:text-gray-300 opacity-0 
-                                   group-hover:opacity-100 transition-opacity duration-300 
-                                   line-clamp-2"
-                        data-testid={`category-description-${cat.id}`}
-                      >
-                        {t(`entity.category.${cat.id}.description`, { defaultValue: cat.description })}
-                      </p>
+                        <p
+                          className="text-sm text-gray-600 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2"
+                          data-testid={`category-description-${cat.id}`}
+                        >
+                          {t(`entity.category.${cat.id}.description`, { defaultValue: cat.description })}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="h-auto flex items-center justify-center 
-                                    bg-gradient-to-t from-black/5 to-transparent 
-                                    border-t border-gray-200/50 dark:border-gray-700/50 
-                                    relative overflow-hidden">
-                      {cat.image_url ? (
-                        <>
-                          <img
-                            src={getImageUrl(cat.image_url)}
-                            alt={cat.name}
-                            className="w-auto max-h-28 sm:max-h-40 object-contain 
-                                       group-hover:scale-110 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-b 
-                                          from-slate-100/90 via-slate-100/40 to-transparent 
-                                          dark:from-slate-800/90 dark:via-slate-800/40 
-                                          dark:to-transparent pointer-events-none" />
-                        </>
-                      ) : (
-                        <img
-                          src={process.env.PUBLIC_URL + '/logo.png'}
-                          alt={cat.name}
-                          className="w-auto max-h-28 sm:max-h-40 object-contain opacity-40 
-                                     group-hover:scale-110 transition-transform duration-300"
-                        />
-                      )}
+                    {/* Image Section - Bottom with Gradient Fade */}
+                    <div className="absolute bottom-0 left-0 right-0 h-40 flex items-center justify-center overflow-hidden">
+                      {/* Background Image or Logo */}
+                      <img
+                        src={cat.image_url ? getImageUrl(cat.image_url) : '/logo.png'}
+                        alt={cat.name}
+                        className={`h-full w-auto object-contain object-center group-hover:scale-110 transition-transform duration-300 ${
+                          cat.image_url ? '' : 'opacity-40'
+                        }`}
+                      />
+                      
+                      {/* Gradient Overlay - Fading from transparent top to opaque bottom */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-white/80 dark:from-transparent dark:via-slate-800/30 dark:to-slate-800 pointer-events-none" />
                     </div>
 
-                    <div className="absolute inset-0 rounded-xl border-2 
-                                    border-blue-500/0 group-hover:border-blue-500/30 
-                                    transition-all duration-300 pointer-events-none" />
+                    {/* Border Accent on Hover */}
+                    <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-400/50 transition-colors duration-300 pointer-events-none z-30" />
                   </Card>
                 </Link>
               ))}
