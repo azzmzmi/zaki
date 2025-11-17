@@ -37,7 +37,7 @@ export default function AdminPartners() {
       setPartners(response.data || []);
     } catch (error) {
       console.error('Failed to fetch partners:', error);
-      toast.error('Failed to load partners');
+      toast.error(t('partners.failedToLoadPartners'));
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function AdminPartners() {
     if (!file) return;
 
     if (!formData.name.trim()) {
-      toast.error('Please enter partner name');
+      toast.error(t('partners.enterName'));
       return;
     }
 
@@ -71,13 +71,13 @@ export default function AdminPartners() {
         logo_url: logoUrl,
       });
 
-      toast.success('Partner added successfully');
+      toast.success(t('partners.addedSuccessfully'));
       setFormData({ name: '', file: null });
       setIsDialogOpen(false);
       fetchPartners();
     } catch (error) {
       console.error('Upload failed:', error);
-      toast.error('Failed to upload partner logo');
+      toast.error(t('partners.failedToUpload'));
     } finally {
       setUploading(false);
     }
@@ -87,11 +87,11 @@ export default function AdminPartners() {
   const deletePartner = async (partnerId) => {
     try {
       await api.delete(`/partners/${partnerId}`);
-      toast.success('Partner deleted successfully');
+      toast.success(t('partners.deletedSuccessfully'));
       fetchPartners();
     } catch (error) {
       console.error('Delete failed:', error);
-      toast.error('Failed to delete partner');
+      toast.error(t('partners.failedToDelete'));
     }
   };
 
@@ -102,10 +102,10 @@ export default function AdminPartners() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Manage Partners
+              {t('partners.manageTitle')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Add and manage brand partner logos
+              {t('partners.manageDescription')}
             </p>
           </div>
           <Button
@@ -114,7 +114,7 @@ export default function AdminPartners() {
             data-testid="add-partner-button"
           >
             <Plus className="w-4 h-4" />
-            Add Partner
+            {t('partners.addButton')}
           </Button>
         </div>
 
@@ -157,10 +157,10 @@ export default function AdminPartners() {
         ) : (
           <Card className="p-12 text-center">
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              No partners added yet
+              {t('partners.noPartners')}
             </p>
             <Button onClick={() => setIsDialogOpen(true)} variant="outline">
-              Add your first partner
+              {t('partners.addFirstPartner')}
             </Button>
           </Card>
         )}
@@ -170,18 +170,20 @@ export default function AdminPartners() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Partner Logo</DialogTitle>
+            <DialogTitle>{t('partners.addTitle')}</DialogTitle>
             <DialogDescription>
-              Upload a partner logo to display on the homepage
+              {t('partners.addDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="partner-name">Partner Name *</Label>
+              <Label htmlFor="partner-name">
+                {t('partners.partnerName')} *
+              </Label>
               <Input
                 id="partner-name"
-                placeholder="Enter partner name"
+                placeholder={t('partners.partnerName')}
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -191,7 +193,9 @@ export default function AdminPartners() {
             </div>
 
             <div>
-              <Label htmlFor="partner-logo">Logo Image *</Label>
+              <Label htmlFor="partner-logo">
+                {t('partners.logoImage')} *
+              </Label>
               <div className="mt-2 relative">
                 <input
                   id="partner-logo"
@@ -210,7 +214,7 @@ export default function AdminPartners() {
                   disabled={uploading}
                 >
                   <Upload className="w-4 h-4" />
-                  {uploading ? 'Uploading...' : 'Choose Image'}
+                  {uploading ? t('partners.uploading') : t('partners.chooseImage')}
                 </Button>
               </div>
               {formData.file && (
@@ -229,7 +233,7 @@ export default function AdminPartners() {
                 }}
                 disabled={uploading}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
             </div>
           </div>

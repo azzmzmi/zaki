@@ -99,16 +99,40 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {categories.map((cat) => (
                 <Link key={cat.id} to={`/products?category=${cat.id}`}>
-                  <Card className="overflow-hidden group relative h-48 rounded-xl" data-testid={`category-card-${cat.id}`}>
-                    <div
-                      className="absolute inset-0 bg-center bg-cover transition-transform duration-300 group-hover:scale-105 blur-xs opacity-50 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ backgroundImage: `url(${cat.image_url || getImageUrl(`/api/uploads/${cat.id}.png`)})` }} 
-                    />
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-                    <div className="absolute top-0 left-0 right-0 p-4">
-                      <h3 className="text-white text-xl font-bold drop-shadow-xl text-shadow-xl" data-testid={`category-name-${cat.id}`}>{t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}</h3>
-                      <p className="text-white text-sm font-semibold drop-shadow-xl text-shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" data-testid={`category-description-${cat.id}`}>{t(`entity.category.${cat.id}.description`, { defaultValue: cat.description })}</p>
+                  <Card className="overflow-hidden group relative h-64 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 hover:shadow-2xl transition-all duration-300 flex flex-col shadow-md" data-testid={`category-card-${cat.id}`}>
+                    {/* Content Section - Top */}
+                    <div className="flex-1 p-6 flex flex-col justify-start relative z-10">
+                      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2 group-hover:from-blue-700 group-hover:to-indigo-700 transition-all" data-testid={`category-name-${cat.id}`}>
+                        {t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2" data-testid={`category-description-${cat.id}`}>
+                        {t(`entity.category.${cat.id}.description`, { defaultValue: cat.description })}
+                      </p>
                     </div>
+                    
+                    {/* Image Section - Bottom Aligned */}
+                    <div className="h-auto bg-gradient-to-t from-black/5 to-transparent flex items-center justify-center border-t border-gray-200/50 dark:border-gray-700/50 relative overflow-hidden">
+                      {cat.image_url ? (
+                        <>
+                          <img
+                            src={getImageUrl(cat.image_url)}
+                            alt={t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}
+                            className="h-auto w-auto object-contain group-hover:scale-110 transition-transform duration-300"
+                          />
+                          {/* Gradient mask - transparent top to bottom */}
+                          <div className="absolute inset-0 bg-gradient-to-b from-slate-100/90 via-slate-100/40 to-transparent dark:from-slate-800/90 dark:via-slate-800/40 dark:to-transparent pointer-events-none" />
+                        </>
+                      ) : (
+                        <img
+                          src={process.env.PUBLIC_URL + '/logo.png'}
+                          alt={t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}
+                          className="h-100 w-auto object-contain opacity-40 group-hover:scale-110 transition-transform duration-300"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Hover Effect Border */}
+                    <div className="absolute inset-0 rounded-xl border-2 border-blue-500/0 group-hover:border-blue-500/30 transition-all duration-300 pointer-events-none" />
                   </Card>
                 </Link>
               ))}
@@ -272,7 +296,7 @@ export default function Home() {
                 ? [...partners, ...partners].map((partner, idx) => (
                     <div key={`${partner.id}-${idx}`} className="logo-item">
                       <img
-                        src={partner.logo_url}
+                        src={getImageUrl(partner.logo_url)}
                         alt={partner.name}
                         title={partner.name}
                       />
