@@ -8,13 +8,13 @@ export default function Footer() {
 
   return (
     <footer className="w-full bg-gradient-to-r from-amber-900 via-orange-800 to-yellow-700 dark:from-amber-900 dark:via-orange-800 dark:to-yellow-800 text-white mt-16">
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4">{CONTACT_INFO.company_name}</h3>
-            <p className="text-sm text-gray-300 mb-4">
+            <h3 className="text-base sm:text-lg font-bold mb-4">{CONTACT_INFO.company_name}</h3>
+            <p className="text-xs sm:text-sm text-gray-300 mb-4">
               {t('footer_description') || 'Your trusted online shopping destination for quality products and excellent service.'}
             </p>
             <div className="flex gap-4">
@@ -32,8 +32,8 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">{t('quick_links') || 'Quick Links'}</h4>
-            <ul className="space-y-2 text-sm text-gray-300">
+            <h4 className="text-base sm:text-lg font-semibold mb-4">{t('quick_links') || 'Quick Links'}</h4>
+            <ul className="space-y-2 text-xs sm:text-sm text-gray-300">
               <li><a href="/" className="hover:text-white transition-colors">{t('nav.home') || 'Home'}</a></li>
               <li><a href="/products" className="hover:text-white transition-colors">{t('nav.products') || 'Products'}</a></li>
               <li><a href="/cart" className="hover:text-white transition-colors">{t('cart.title') || 'Cart'}</a></li>
@@ -43,8 +43,8 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">{t('contact_info') || 'Contact Info'}</h4>
-            <div className="space-y-3 text-sm text-gray-300">
+            <h4 className="text-base sm:text-lg font-semibold mb-4">{t('contact_info') || 'Contact Info'}</h4>
+            <div className="space-y-3 text-xs sm:text-sm text-gray-300">
               <div className="flex gap-2 items-start">
                 <Phone size={18} className="mt-0.5 flex-shrink-0" />
                 <a href={`tel:${CONTACT_INFO.phone}`} className="hover:text-white transition-colors">{CONTACT_INFO.phone}</a>
@@ -65,7 +65,7 @@ export default function Footer() {
         <div className="border-t border-white/20 my-8"></div>
 
         {/* Bottom Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm text-gray-400 gap-4 sm:gap-0">
           <p>&copy; {currentYear} {CONTACT_INFO.company_name}. {t('all_rights_reserved') || 'All rights reserved.'}</p>
         </div>
       </div>

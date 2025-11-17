@@ -89,7 +89,7 @@ export default function Checkout() {
       <h1 className="text-4xl font-bold mb-8" data-testid="checkout-title">{t('checkout.title')}</h1>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           <div className="space-y-6">
             <Card className="p-6">
               <h2 className="text-2xl font-bold mb-4">{t('checkout.shippingAddress')}</h2>
@@ -117,7 +117,7 @@ export default function Checkout() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="city">{t('checkout.city') || 'City'} *</Label>
                     <Input
@@ -145,7 +145,7 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="zip">{t('checkout.zipCode') || 'ZIP Code'} *</Label>
                     <Input
@@ -190,7 +190,7 @@ export default function Checkout() {
           </div>
 
           <div>
-            <Card className="p-6 sticky top-24">
+            <Card className="p-4 sm:p-6 sticky top-24">
               <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
               <div className="space-y-4 mb-6">
                 {items.map((item) => (

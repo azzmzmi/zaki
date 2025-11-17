@@ -91,12 +91,12 @@ export default function Dashboard() {
         </div>
         
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 hover:shadow-xl transition-all border-l-4 border-l-blue-500">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <Card className="p-4 sm:p-6 hover:shadow-xl transition-all border-l-4 border-l-blue-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin.totalSales')}</p>
-                <p className="text-3xl font-bold text-blue-600">${analytics?.total_sales?.toFixed(2) || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('admin.totalSales')}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">${analytics?.total_sales?.toFixed(2) || 0}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {t('admin.recentSales')}: ${analytics?.recent_sales?.toFixed(2) || 0}
                 </p>
@@ -105,11 +105,11 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all border-l-4 border-l-green-500">
+          <Card className="p-4 sm:p-6 hover:shadow-xl transition-all border-l-4 border-l-green-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin.totalOrders')}</p>
-                <p className="text-3xl font-bold text-green-600">{analytics?.total_orders || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('admin.totalOrders')}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">{analytics?.total_orders || 0}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {t('admin.averageOrderValue')}: ${(analytics?.total_orders ? (analytics.total_sales / analytics.total_orders).toFixed(2) : 0)}
                 </p>
@@ -118,11 +118,11 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all border-l-4 border-l-purple-500">
+          <Card className="p-4 sm:p-6 hover:shadow-xl transition-all border-l-4 border-l-purple-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin.totalUsers')}</p>
-                <p className="text-3xl font-bold text-purple-600">{analytics?.total_users || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('admin.totalUsers')}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600">{analytics?.total_users || 0}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {t('admin.activeUsers')}: {Math.round((analytics?.total_users || 0) * 0.7)}
                 </p>
@@ -131,11 +131,11 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-xl transition-all border-l-4 border-l-indigo-500">
+          <Card className="p-4 sm:p-6 hover:shadow-xl transition-all border-l-4 border-l-indigo-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin.totalProducts')}</p>
-                <p className="text-3xl font-bold text-indigo-600">{analytics?.total_products || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('admin.totalProducts')}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-indigo-600">{analytics?.total_products || 0}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {t('admin.outOfStock')}: 0
                 </p>
@@ -146,11 +146,11 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
           {/* Sales Trend Chart */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">{t('admin.salesTrend')}</h3>
-            <div className="h-80">
+          <Card className="p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">{t('admin.salesTrend')}</h3>
+            <div className="h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dailySalesData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -186,9 +186,9 @@ export default function Dashboard() {
           </Card>
 
           {/* Order Status Distribution */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">{t('admin.orderStatusDistribution')}</h3>
-            <div className="h-80">
+          <Card className="p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">{t('admin.orderStatusDistribution')}</h3>
+            <div className="h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -222,11 +222,11 @@ export default function Dashboard() {
         </div>
 
         {/* Additional Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           {/* Top Products */}
-          <Card className="p-6 lg:col-span-2">
-            <h3 className="text-lg font-semibold mb-4">{t('admin.topSellingProducts')}</h3>
-            <div className="h-80">
+          <Card className="p-4 sm:p-6 lg:col-span-2">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">{t('admin.topSellingProducts')}</h3>
+            <div className="h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topProductsData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -255,10 +255,10 @@ export default function Dashboard() {
           </Card>
 
           {/* Order Status Summary */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">{t('admin.orderStatusSummary')}</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <Card className="p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">{t('admin.orderStatusSummary')}</h3>
+            <div className="space-y-2 sm:space-y-4">
+              <div className="flex items-center justify-between p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-yellow-500" />
                   <span>{t('orders.status.pending')}</span>
@@ -266,7 +266,7 @@ export default function Dashboard() {
                 <span className="font-semibold">{analytics?.status_breakdown?.pending || 0}</span>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <div className="flex items-center justify-between p-2 sm:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-purple-500" />
                   <span>{t('orders.status.processing')}</span>
@@ -274,7 +274,7 @@ export default function Dashboard() {
                 <span className="font-semibold">{analytics?.status_breakdown?.processing || 0}</span>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <div className="flex items-center justify-between p-2 sm:p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5 text-indigo-500" />
                   <span>{t('orders.status.shipped')}</span>
@@ -282,7 +282,7 @@ export default function Dashboard() {
                 <span className="font-semibold">{analytics?.status_breakdown?.shipped || 0}</span>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="flex items-center justify-between p-2 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
                   <span>{t('orders.status.delivered')}</span>
@@ -290,7 +290,7 @@ export default function Dashboard() {
                 <span className="font-semibold">{analytics?.status_breakdown?.delivered || 0}</span>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <div className="flex items-center justify-between p-2 sm:p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <XCircle className="w-5 h-5 text-red-500" />
                   <span>{t('orders.status.cancelled')}</span>

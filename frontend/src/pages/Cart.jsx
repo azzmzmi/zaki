@@ -24,16 +24,16 @@ export default function Cart() {
     <div className="max-w-7xl mx-auto px-4 py-8" data-testid="cart-page">
       <h1 className="text-4xl font-bold mb-8 text-center lg:text-left" data-testid="cart-title">{t('cart.title')}</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
         {/* Items */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
           {items.map((item) => (
-            <Card key={item.id} className="p-4" data-testid={`cart-item-${item.id}`}>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <Card key={item.id} className="p-3 sm:p-4" data-testid={`cart-item-${item.id}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
 
                 {/* Image */}
-                <div className="w-full sm:w-24 h-48 sm:h-24 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-full sm:w-20 h-40 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                   <img
                     src={getImageUrl(item.image_url)}
                     alt={t(`entity.product.${item.id}.name`, { defaultValue: item.name })}
@@ -84,7 +84,7 @@ export default function Cart() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <Card className="p-6 lg:sticky lg:top-24">
+          <Card className="p-4 sm:p-6 lg:sticky lg:top-24">
             <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">

@@ -52,8 +52,8 @@ export default function ProductDetail() {
         Back
       </Button>
 
-      <div className="grid md:grid-cols-2 gap-12">
-        <Card className="overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        <Card className="overflow-hidden h-fit">
           <div className="aspect-square bg-gray-100 dark:bg-gray-800">
             <img
               src={getImageUrl(product.image_url)}
@@ -64,9 +64,9 @@ export default function ProductDetail() {
           </div>
         </Card>
 
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold" data-testid="product-name">{t(`entity.product.${product.id}.name`, { defaultValue: product.name })}</h1>
-          <div className="text-4xl font-bold text-blue-600" data-testid="product-price">${product.price}</div>
+        <div className="space-y-4 sm:space-y-6">
+          <h1 className="text-2xl sm:text-4xl font-bold" data-testid="product-name">{t(`entity.product.${product.id}.name`, { defaultValue: product.name })}</h1>
+          <div className="text-2xl sm:text-4xl font-bold text-blue-600" data-testid="product-price">${product.price}</div>
           
           <div>
             <h3 className="font-semibold text-lg mb-2">{t('products.description')}</h3>
@@ -81,7 +81,7 @@ export default function ProductDetail() {
 
           <Button
             size="lg"
-            className="w-full md:w-auto"
+            className="w-full sm:w-auto"
             onClick={handleAddToCart}
             disabled={product.stock === 0}
             data-testid="add-to-cart-button"
