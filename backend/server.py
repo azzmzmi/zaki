@@ -115,11 +115,13 @@ class Category(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: Optional[str] = None
+    image_url: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CategoryCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -207,6 +209,17 @@ class ThemeSettingsUpdate(BaseModel):
     accent_color: Optional[str] = None
     font_size: Optional[str] = None
     border_radius: Optional[str] = None
+
+class Partner(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    logo_url: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PartnerCreate(BaseModel):
+    name: str
+    logo_url: str
 
 # Helper functions
 def hash_password(password: str) -> str:
@@ -780,6 +793,39 @@ async def update_theme(theme_data: ThemeSettingsUpdate, admin: User = Depends(re
     if isinstance(updated['updated_at'], str):
         updated['updated_at'] = datetime.fromisoformat(updated['updated_at'])
     return ThemeSettings(**updated)
+
+# Partner Routes
+@api_router.get("/partners")
+async def get_partners():
+    """Get all partners"""
+    partners = await db.partners.find({}, {"_id": 0}).to_list(length=None)
+    return partners or []
+
+@api_router.post("/partners", response_model=Partner)
+async def create_partner(partner_data: PartnerCreate, admin: User = Depends(require_admin)):
+    """Create a new partner"""
+    partner = Partner(
+        name=partner_data.name,
+        logo_url=partner_data.logo_url
+    )
+    
+    partner_dict = partner.model_dump()
+    partner_dict['created_at'] = partner_dict['created_at'].isoformat()
+    
+    result = await db.partners.insert_one(partner_dict)
+    partner_dict['id'] = str(result.inserted_id) if hasattr(result, 'inserted_id') else partner.id
+    
+    return Partner(**partner_dict)
+
+@api_router.delete("/partners/{partner_id}")
+async def delete_partner(partner_id: str, admin: User = Depends(require_admin)):
+    """Delete a partner"""
+    result = await db.partners.delete_one({"id": partner_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    
+    return {"message": "Partner deleted successfully"}
 
 # File Upload
 @api_router.post("/upload")

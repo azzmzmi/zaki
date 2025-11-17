@@ -7,9 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { categoriesApi, translationsApi } from '@/lib/api';
+import { categoriesApi, translationsApi, uploadApi } from '@/lib/api';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import i18n from '@/i18n';
 
@@ -18,7 +18,8 @@ export default function AdminCategories() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [formData, setFormData] = useState({ name: '', description: '', name_ar: '', description_ar: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', name_ar: '', description_ar: '', image_url: '' });
+  const [uploading, setUploading] = useState(false);
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['admin-categories'],
@@ -86,16 +87,33 @@ export default function AdminCategories() {
           name: category.name, 
           description: category.description || '', 
           name_ar: arName, 
-          description_ar: arDesc 
+          description_ar: arDesc,
+          image_url: category.image_url || ''
         });
       } catch (error) {
-        setFormData({ name: category.name, description: category.description || '', name_ar: '', description_ar: '' });
+        setFormData({ name: category.name, description: category.description || '', name_ar: '', description_ar: '', image_url: category.image_url || '' });
       }
     } else {
       setEditingCategory(null);
-      setFormData({ name: '', description: '', name_ar: '', description_ar: '' });
+      setFormData({ name: '', description: '', name_ar: '', description_ar: '', image_url: '' });
     }
     setIsDialogOpen(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const response = await uploadApi.upload(file);
+      setFormData({ ...formData, image_url: response.data.url });
+      toast.success(t('category.imageUploaded') || 'Image uploaded successfully');
+    } catch (error) {
+      toast.error(t('category.imageUploadFailed') || 'Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleCloseDialog = () => {
@@ -169,6 +187,35 @@ export default function AdminCategories() {
               <div>
                 <Label>{t('category.arabicDescription')}</Label>
                 <Textarea dir="rtl" value={ formData.description_ar } onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} data-testid="category-ar-description-input" />
+              </div>
+              <div>
+                <Label>Category Image</Label>
+                <div className="mt-2 relative">
+                  <input
+                    id="category-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                    data-testid="category-image-input"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={() => document.getElementById('category-image').click()}
+                    disabled={uploading}
+                  >
+                    <Upload className="w-4 h-4" />
+                    {uploading ? 'Uploading...' : 'Upload Image'}
+                  </Button>
+                  {formData.image_url && (
+                    <div className="mt-2">
+                      <img src={formData.image_url} alt="Category preview" className="max-h-32 max-w-32 object-contain" />
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={handleCloseDialog} data-testid="cancel-category-button">{t('common.cancel')}</Button>

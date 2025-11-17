@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, ShoppingBag, TrendingUp, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
-import { productsApi, categoriesApi } from '@/lib/api';
+import { productsApi, categoriesApi, api } from '@/lib/api';
 import { getImageUrl } from '@/lib/imageUtils';
 
 export default function Home() {
@@ -43,6 +43,20 @@ export default function Home() {
     }
   };
 
+  // Fetch partners from API
+  const { data: partners = [] } = useQuery({
+    queryKey: ['partners'],
+    queryFn: async () => {
+      try {
+        const response = await api.get('/partners');
+        return response.data || [];
+      } catch (error) {
+        console.error('Failed to fetch partners:', error);
+        return [];
+      }
+    },
+  });
+
   const { data: categories } = useQuery({
     queryKey: ['categories-home'],
     queryFn: async () => {
@@ -79,25 +93,21 @@ export default function Home() {
         </div>
       </section> */}
 
-{/*       {/* Categories 
       {categories && categories.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" data-testid="categories-title">
-              {t('home.shopByCategory')}
-            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {categories.map((cat) => (
                 <Link key={cat.id} to={`/products?category=${cat.id}`}>
                   <Card className="overflow-hidden group relative h-48 rounded-xl" data-testid={`category-card-${cat.id}`}>
                     <div
                       className="absolute inset-0 bg-center bg-cover transition-transform duration-300 group-hover:scale-105 blur-xs opacity-50 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ backgroundImage: `url(${getImageUrl(`/api/uploads/${cat.id}.png`)})` }} 
+                      style={{ backgroundImage: `url(${cat.image_url || getImageUrl(`/api/uploads/${cat.id}.png`)})` }} 
                     />
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="absolute top-0 left-0 right-0 p-4">
                       <h3 className="text-white text-xl font-bold drop-shadow-xl text-shadow-xl" data-testid={`category-name-${cat.id}`}>{t(`entity.category.${cat.id}.name`, { defaultValue: cat.name })}</h3>
-                      <p className="text-white text-sm font-semibold drop-shadow-xl text-shadow-xl" data-testid={`category-description-${cat.id}`}>{t(`entity.category.${cat.id}.description`, { defaultValue: cat.description })}</p>
+                      <p className="text-white text-sm font-semibold drop-shadow-xl text-shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" data-testid={`category-description-${cat.id}`}>{t(`entity.category.${cat.id}.description`, { defaultValue: cat.description })}</p>
                     </div>
                   </Card>
                 </Link>
@@ -105,7 +115,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-      )} */}  
+      )}
 
 
       {/* Features */}
@@ -136,9 +146,9 @@ export default function Home() {
       {products && products.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
-{/*             <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
               {t('home.mostPopular')}
-            </h2> */}
+            </h2> 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link key={product.id} to={`/products/${product.id}`}>
@@ -194,6 +204,85 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Logo Carousel Section */}
+      <section className="py-16 px-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800" data-testid="logo-carousel">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-12 text-center text-gray-900 dark:text-white">
+            {t('home.ourPartners')}
+          </h2>
+          <div className="relative overflow-hidden" style={{ height: '120px' }}>
+            <style>{`
+              @keyframes slideFromRight {
+                from {
+                  transform: translateX(100%);
+                }
+                to {
+                  transform: translateX(0);
+                }
+              }
+              
+              @keyframes scrollLogos {
+                0% {
+                  transform: translateX(0);
+                }
+                100% {
+                  transform: translateX(calc(-100% / 2));
+                }
+              }
+              
+              .logo-carousel-container {
+                display: flex;
+                animation: scrollLogos 30s linear infinite;
+                will-change: transform;
+              }
+              
+              .logo-carousel-container:hover {
+                animation-play-state: paused;
+              }
+              
+              .logo-item {
+                flex: 0 0 calc(100% / 8);
+                min-width: 150px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 20px;
+                opacity: 0.6;
+                transition: opacity 0.3s ease;
+              }
+              
+              .logo-item:hover {
+                opacity: 1;
+              }
+              
+              .logo-item img {
+                max-height: 100px;
+                max-width: 140px;
+                object-fit: contain;
+                filter: brightness(0.9) contrast(1.1);
+              }
+              
+              .logo-item:hover img {
+                filter: brightness(1) contrast(1.2);
+              }
+            `}</style>
+            <div className="logo-carousel-container">
+              {partners && partners.length > 0
+                ? [...partners, ...partners].map((partner, idx) => (
+                    <div key={`${partner.id}-${idx}`} className="logo-item">
+                      <img
+                        src={partner.logo_url}
+                        alt={partner.name}
+                        title={partner.name}
+                      />
+                    </div>
+                  ))
+                : null}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
