@@ -19,6 +19,7 @@ export default function AdminLayout({ children }) {
     { path: '/admin/categories', icon: FolderTree, label: t('admin.categories') },
     { path: '/admin/orders', icon: ShoppingCart, label: t('admin.orders') },
     { path: '/admin/users', icon: Users, label: t('admin.users') },
+    { path: '/admin/partners', icon: Users, label: t('admin.partners') },
     { path: '/admin/theme', icon: Palette, label: t('admin.theme') || 'Theme' }
   ];
 
