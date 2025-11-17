@@ -80,11 +80,11 @@ export default function Products() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8" data-testid="products-page">
-      <h1 className="text-4xl font-bold mb-8" data-testid="products-title">{t('products.title')}</h1>
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8" data-testid="products-page">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8" data-testid="products-title">{t('products.title')}</h1>
 
       {/* Filters and Sorting */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
@@ -96,7 +96,7 @@ export default function Products() {
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-[200px]" data-testid="category-filter">
+          <SelectTrigger className="w-full sm:w-auto" data-testid="category-filter">
             <SelectValue placeholder={t('products.allCategories')} />
           </SelectTrigger>
           <SelectContent>
@@ -107,7 +107,7 @@ export default function Products() {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full sm:w-[220px]" data-testid="sort-filter">
+          <SelectTrigger className="w-full sm:w-auto" data-testid="sort-filter">
             <SelectValue placeholder={t('products.sortBy')} />
           </SelectTrigger>
           <SelectContent>

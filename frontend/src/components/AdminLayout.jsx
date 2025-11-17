@@ -24,9 +24,9 @@ export default function AdminLayout({ children }) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="grid lg:grid-cols-4 gap-8">
-        <aside className="lg:col-span-1">
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
+        <aside className="md:col-span-1">
           <nav className="space-y-2 sticky top-24" data-testid="admin-sidebar">
             {menuItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -35,21 +35,21 @@ export default function AdminLayout({ children }) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  className={`flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
                     isActive
                       ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                   data-testid={`admin-nav-${item.path.split('/').pop() || 'dashboard'}`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 flex-shrink-0" />
                   <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
         </aside>
-        <main className="lg:col-span-3">{children}</main>
+        <main className="md:col-span-3">{children}</main>
       </div>
     </div>
   );

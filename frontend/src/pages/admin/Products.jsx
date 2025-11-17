@@ -160,9 +160,9 @@ export default function AdminProducts() {
   return (
     <AdminLayout>
       <div data-testid="admin-products-page">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold" data-testid="admin-products-title">{t('admin.products')}</h1>
-          <Button onClick={() => handleOpenDialog()} data-testid="add-product-button">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold" data-testid="admin-products-title">{t('admin.products')}</h1>
+          <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto" data-testid="add-product-button">
             <Plus className="w-4 h-4 mr-2" />
             {t('admin.addProduct')}
           </Button>
@@ -171,18 +171,18 @@ export default function AdminProducts() {
         {isLoading ? (
           <div data-testid="loading-indicator">{t('common.loading')}</div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4">
             {products?.map((product) => (
-              <Card key={product.id} className="p-4" data-testid={`product-row-${product.id}`}>
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
+              <Card key={product.id} className="p-3 sm:p-4" data-testid={`product-row-${product.id}`}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
                     <img src={getImageUrl(product.image_url)} alt={product.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold" data-testid={`product-name-${product.id}`}>{t(`entity.product.${product.id}.name`, { defaultValue: product.name })}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">${product.price} • Stock: {product.stock}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm sm:text-base truncate" data-testid={`product-name-${product.id}`}>{t(`entity.product.${product.id}.name`, { defaultValue: product.name })}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">${product.price} • Stock: {product.stock}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0 ml-auto sm:ml-0">
                     <Button variant="outline" size="sm" onClick={() => handleOpenDialog(product)} data-testid={`edit-product-${product.id}`}>
                       <Pencil className="w-4 h-4" />
                     </Button>
@@ -197,11 +197,11 @@ export default function AdminProducts() {
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent data-testid="product-dialog">
+          <DialogContent className="max-w-[95vw] sm:max-w-lg" data-testid="product-dialog">
             <DialogHeader>
-              <DialogTitle>{editingProduct ? t('product.editTitle') : t('admin.addProduct')}</DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">{editingProduct ? t('product.editTitle') : t('admin.addProduct')}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 max-h-[80vh] overflow-y-auto">
               <div>
                 <Label>{t('product.name')} {t('form.required')}</Label>
                 <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required data-testid="product-name-input" />

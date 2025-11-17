@@ -146,7 +146,7 @@ export default function Home() {
       {products && products.length > 0 && (
         <section className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
               {t('home.mostPopular')}
             </h2>
 
