@@ -22,14 +22,18 @@ export default function Cart() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8" data-testid="cart-page">
-      <h1 className="text-4xl font-bold mb-8" data-testid="cart-title">{t('cart.title')}</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center lg:text-left" data-testid="cart-title">{t('cart.title')}</h1>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        {/* Items */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
             <Card key={item.id} className="p-4" data-testid={`cart-item-${item.id}`}>
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+
+                {/* Image */}
+                <div className="w-full sm:w-24 h-48 sm:h-24 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                   <img
                     src={getImageUrl(item.image_url)}
                     alt={t(`entity.product.${item.id}.name`, { defaultValue: item.name })}
@@ -37,12 +41,14 @@ export default function Cart() {
                   />
                 </div>
 
-                <div className="flex-1">
+                {/* Name & Price */}
+                <div className="flex-1 flex flex-col justify-between">
                   <h3 className="font-semibold text-lg" data-testid={`item-name-${item.id}`}>{t(`entity.product.${item.id}.name`, { defaultValue: item.name })}</h3>
                   <p className="text-xl font-bold text-blue-600" data-testid={`item-price-${item.id}`}>${item.price}</p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-2 mt-2 sm:mt-0">
                   <Button
                     variant="outline"
                     size="icon"
@@ -62,6 +68,7 @@ export default function Cart() {
                   </Button>
                 </div>
 
+                {/* Remove Button */}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -75,8 +82,9 @@ export default function Cart() {
           ))}
         </div>
 
+        {/* Order Summary */}
         <div className="lg:col-span-1">
-          <Card className="p-6 sticky top-24">
+          <Card className="p-6 lg:sticky lg:top-24">
             <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">
@@ -95,6 +103,7 @@ export default function Cart() {
             </Button>
           </Card>
         </div>
+
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import AdminLayout from '@/components/AdminLayout';
 import { User, Edit } from 'lucide-react';
 import { useState } from 'react';
 import EditUserModal from '@/components/admin/EditUserModal';
-import { useAuthStore } from '@/store/authStore';
 
 export default function AdminUsers() {
   const { t } = useTranslation();
@@ -38,29 +37,39 @@ export default function AdminUsers() {
           <div className="grid gap-4">
             {users?.map((user) => (
               <Card key={user.id} className="p-6" data-testid={`user-row-${user.id}`}>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <User className="w-6 h-6 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg" data-testid={`user-name-${user.id}`}>{user.full_name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400" data-testid={`user-email-${user.id}`}>{user.email}</p>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg truncate" data-testid={`user-name-${user.id}`}>
+                      {user.full_name}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate" data-testid={`user-email-${user.id}`}>
+                      {user.email}
+                    </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold flex-shrink-0 ${
                     user.role === 'admin' 
                       ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' 
                       : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                   }`} data-testid={`user-role-${user.id}`}>
                     {user.role}
                   </span>
+
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => handleEditUser(user)}
+                    className="flex-shrink-0"
                     data-testid={`edit-user-${user.id}`}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
+
                 </div>
               </Card>
             ))}

@@ -189,7 +189,7 @@ export default function AdminCategories() {
                 <Textarea dir="rtl" value={ formData.description_ar } onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} data-testid="category-ar-description-input" />
               </div>
               <div>
-                <Label>Category Image</Label>
+                <Label>{t('category.image')}</Label>
                 <div className="mt-2 relative">
                   <input
                     id="category-image"
