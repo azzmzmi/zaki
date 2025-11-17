@@ -15,16 +15,15 @@ export const getImageUrl = (imageUrl) => {
   
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
   const isLocalhost = backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1');
-  const renderUploadsUrl = 'https://sandvally.onrender.com/api/uploads';
   
-  // If it's the /api/uploads path, use Render for localhost development
+  // If it's the /api/uploads path
   if (imageUrl.startsWith('/api/uploads/')) {
     if (isLocalhost) {
-      // Local development: extract filename and use Render's URL
+      // Local development: use Render's URL for uploaded images
       const filename = imageUrl.split('/').pop();
-      return `${renderUploadsUrl}/${filename}`;
+      return `https://sandvally.onrender.com/api/uploads/${filename}`;
     }
-    // Production: use local backend
+    // Production: use the backend URL directly
     return `${backendUrl}${imageUrl}`;
   }
   
