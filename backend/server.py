@@ -62,7 +62,30 @@ from fastapi.responses import FileResponse
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Enums
+# Error Messages Configuration
+ERROR_MESSAGES = {
+    # Authentication
+    "INVALID_CREDENTIALS": "Invalid credentials",
+    "EMAIL_ALREADY_REGISTERED": "Email already registered",
+    "TOKEN_EXPIRED": "Token has expired",
+    "INVALID_TOKEN": "Invalid token",
+    "INVALID_TOKEN_TYPE": "Invalid token type",
+    "RESET_TOKEN_EXPIRED": "Reset token has expired",
+    "INVALID_RESET_TOKEN": "Invalid reset token",
+    
+    # Authorization
+    "ADMIN_ACCESS_REQUIRED": "Admin access required",
+    
+    # Not Found
+    "USER_NOT_FOUND": "User not found",
+    "CATEGORY_NOT_FOUND": "Category not found",
+    "PRODUCT_NOT_FOUND": "Product not found",
+    "ORDER_NOT_FOUND": "Order not found",
+    
+    # Validation
+    "UNSUPPORTED_LANGUAGE": "Unsupported language",
+    "INVALID_FILE": "Invalid file",
+}
 class UserRole(str, Enum):
     ADMIN = "admin"
     CUSTOMER = "customer"
@@ -246,23 +269,23 @@ def decode_token(token: str) -> dict:
         return payload
     except jwt.ExpiredSignatureError:
         logger.error(f"Token has expired: {token[:20]}...")
-        raise HTTPException(status_code=401, detail="Token has expired")
+        raise HTTPException(status_code=401, detail=ERROR_MESSAGES["TOKEN_EXPIRED"])
     except jwt.PyJWTError as e:
         logger.error(f"Invalid token: {str(e)}, token: {token[:20]}...")
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(status_code=401, detail=ERROR_MESSAGES["INVALID_TOKEN"])
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
     token = credentials.credentials
     payload = decode_token(token)
     
     if payload.get("type") != "access":
-        raise HTTPException(status_code=401, detail="Invalid token type")
+        raise HTTPException(status_code=401, detail=ERROR_MESSAGES["INVALID_TOKEN_TYPE"])
     
     user_id = payload.get("user_id")
     user_data = await db.users.find_one({"id": user_id}, {"_id": 0})
     
     if not user_data:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=ERROR_MESSAGES["USER_NOT_FOUND"])
     
     if isinstance(user_data['created_at'], str):
         user_data['created_at'] = datetime.fromisoformat(user_data['created_at'])
@@ -271,7 +294,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Admin access required")
+        raise HTTPException(status_code=403, detail=ERROR_MESSAGES["ADMIN_ACCESS_REQUIRED"])
     return current_user
 
 # Auth Routes
@@ -280,7 +303,7 @@ async def register(user_data: UserCreate):
     # Check if user exists
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail=ERROR_MESSAGES["EMAIL_ALREADY_REGISTERED"])
     
     # Create user
     user = User(
@@ -306,7 +329,7 @@ async def login(credentials: UserLogin):
     user_data = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     
     if not user_data or not verify_password(credentials.password, user_data['password']):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail=ERROR_MESSAGES["INVALID_CREDENTIALS"])
     
     if isinstance(user_data['created_at'], str):
         user_data['created_at'] = datetime.fromisoformat(user_data['created_at'])
@@ -352,12 +375,12 @@ async def update_profile(update_data: UserUpdate, current_user: User = Depends(g
             
             if result.matched_count == 0:
                 logger.error(f"User not found: {current_user.id}")
-                raise HTTPException(status_code=404, detail="User not found")
+                raise HTTPException(status_code=404, detail=ERROR_MESSAGES["USER_NOT_FOUND"])
         
         updated_user = await db.users.find_one({"id": current_user.id}, {"_id": 0, "password": 0})
         if not updated_user:
             logger.error(f"User not found after update: {current_user.id}")
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=ERROR_MESSAGES["USER_NOT_FOUND"])
         
         if isinstance(updated_user['created_at'], str):
             updated_user['created_at'] = datetime.fromisoformat(updated_user['created_at'])
@@ -398,12 +421,12 @@ async def update_user_by_id(user_id: str, update_data: UserUpdate, admin: User =
             
             if result.matched_count == 0:
                 logger.error(f"User not found: {user_id}")
-                raise HTTPException(status_code=404, detail="User not found")
+                raise HTTPException(status_code=404, detail=ERROR_MESSAGES["USER_NOT_FOUND"])
         
         updated_user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
         if not updated_user:
             logger.error(f"User not found after update: {user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=ERROR_MESSAGES["USER_NOT_FOUND"])
         
         if isinstance(updated_user['created_at'], str):
             updated_user['created_at'] = datetime.fromisoformat(updated_user['created_at'])
@@ -419,7 +442,7 @@ async def update_user_by_id(user_id: str, update_data: UserUpdate, admin: User =
 async def forgot_password(request: PasswordReset):
     user = await db.users.find_one({"email": request.email})
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=ERROR_MESSAGES["USER_NOT_FOUND"])
     
     reset_token = jwt.encode(
         {"email": request.email, "type": "password_reset", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
@@ -599,7 +622,7 @@ async def delete_product(product_id: str, admin: User = Depends(require_admin)):
 @api_router.get("/translations/{lang}")
 async def get_translations(lang: str):
     if lang not in ("en", "ar"):
-        raise HTTPException(status_code=400, detail="Unsupported language")
+        raise HTTPException(status_code=400, detail=ERROR_MESSAGES["UNSUPPORTED_LANGUAGE"])
     entries = await db.translations.find({}, {"_id": 0}).to_list(10000)
     result = {}
     for e in entries:
@@ -831,7 +854,7 @@ async def delete_partner(partner_id: str, admin: User = Depends(require_admin)):
 @api_router.post("/upload")
 async def upload_file(file: UploadFile = File(...), admin: User = Depends(require_admin)):
     if not file.filename:
-        raise HTTPException(status_code=400, detail="Invalid file")
+        raise HTTPException(status_code=400, detail=ERROR_MESSAGES["INVALID_FILE"])
     file_extension = file.filename.split('.')[-1]
     file_name = f"{uuid.uuid4()}.{file_extension}"
     file_path = UPLOADS_DIR / file_name
@@ -886,27 +909,8 @@ async def preflight_handler(full_path: str):
 @app.on_event("startup")
 async def startup():
     logger.info("Starting up application...")
-    # Create admin user if not exists
-    try:
-        logger.info(f"Connecting to MongoDB at {mongo_url}")
-        admin_exists = await db.users.find_one({"email": "info@sandvalley.com"})
-        logger.info("Database connection successful")
-        if not admin_exists:
-            admin = User(
-                email="info@sandvalley.com",
-                full_name="Admin User",
-                role=UserRole.ADMIN
-            )
-            admin_dict = admin.model_dump()
-            admin_dict['created_at'] = admin_dict['created_at'].isoformat()
-            admin_dict['password'] = hash_password("admin@SV")
-            await db.users.insert_one(admin_dict)
-            logger.info("Admin user created: info@sandvalley.com / admin@SV")
-        else:
-            logger.info("Admin user already exists")
-    except Exception as e:
-        logger.error(f"Error during startup: {e}")
-        raise
+    logger.info(f"Connecting to MongoDB at {mongo_url}")
+    logger.info("Database connection successful")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

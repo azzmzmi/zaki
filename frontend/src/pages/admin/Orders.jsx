@@ -43,10 +43,10 @@ export default function AdminOrders() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }) => ordersApi.updateStatus(id, status),
     onSuccess: () => {
-      toast.success(t('orders.statusUpdated') || 'Order status updated');
+      toast.success(t('orders.statusUpdated'));
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     },
-    onError: () => toast.error(t('orders.updateError') || 'Failed to update order status')
+    onError: () => toast.error(t('orders.updateError'))
   });
 
   const getStatusColor = (status) => {

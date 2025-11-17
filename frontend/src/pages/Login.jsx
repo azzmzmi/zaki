@@ -73,9 +73,9 @@ export default function Login() {
           </Link>
         </p>
         <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
-          {t('auth.forgotPassword') || 'Forgot password?'}{' '}
+          {t('auth.forgotPassword')}{' '}
           <Link to="/forgot-password" className="text-blue-600 hover:underline">
-            {t('auth.resetPassword') || 'Reset it here'}
+            {t('auth.resetPassword')}
           </Link>
         </p>
 {/*         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">

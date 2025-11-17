@@ -106,7 +106,7 @@ export default function Checkout() {
                 </div>
 
                 <div>
-                  <Label htmlFor="street">{t('checkout.streetAddress') || 'Street Address'} *</Label>
+                  <Label htmlFor="street">{t('checkout.streetAddress')} *</Label>
                   <Input
                     id="street"
                     type="text"
@@ -119,7 +119,7 @@ export default function Checkout() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="city">{t('checkout.city') || 'City'} *</Label>
+                    <Label htmlFor="city">{t('checkout.city')} *</Label>
                     <Input
                       id="city"
                       type="text"
@@ -131,10 +131,10 @@ export default function Checkout() {
                   </div>
 
                   <div>
-                    <Label htmlFor="state">{t('checkout.state') || 'State'} *</Label>
+                    <Label htmlFor="state">{t('checkout.state')} *</Label>
                     <Select value={shippingAddress.state} onValueChange={(value) => handleAddressChange('state', value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select State" />
+                        <SelectValue placeholder={t('checkout.selectState')} />
                       </SelectTrigger>
                       <SelectContent>
                         {US_STATES.map(state => (
@@ -147,7 +147,7 @@ export default function Checkout() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="zip">{t('checkout.zipCode') || 'ZIP Code'} *</Label>
+                    <Label htmlFor="zip">{t('checkout.zipCode')} *</Label>
                     <Input
                       id="zip"
                       type="text"
@@ -207,7 +207,7 @@ export default function Checkout() {
                 </div>
               </div>
               <Button type="submit" className="w-full" size="lg" disabled={createOrderMutation.isPending} data-testid="place-order-button">
-                {createOrderMutation.isPending ? 'Processing...' : t('checkout.placeOrder')}
+                {createOrderMutation.isPending ? t('checkout.processing') : t('checkout.placeOrder')}
               </Button>
             </Card>
           </div>

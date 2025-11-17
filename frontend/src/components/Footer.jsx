@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Facebook, MessageCircle, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, MessageCircle, Instagram, TrendingUp, Mail, Phone, MapPin } from 'lucide-react';
 import { CONTACT_INFO } from '@/config/contact';
 
 export default function Footer() {
@@ -15,7 +15,7 @@ export default function Footer() {
           <div>
             <h3 className="text-base sm:text-lg font-bold mb-4">{CONTACT_INFO.company_name}</h3>
             <p className="text-xs sm:text-sm text-gray-300 mb-4">
-              {t('footer_description') || 'Your trusted online shopping destination for quality products and excellent service.'}
+              {t('footer.description')}
             </p>
             <div className="flex gap-4">
               <a href={CONTACT_INFO.social.facebook} className="text-gray-300 hover:text-white transition-colors">
@@ -32,18 +32,18 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-4">{t('quick_links') || 'Quick Links'}</h4>
+            <h4 className="text-base sm:text-lg font-semibold mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2 text-xs sm:text-sm text-gray-300">
-              <li><a href="/" className="hover:text-white transition-colors">{t('nav.home') || 'Home'}</a></li>
-              <li><a href="/products" className="hover:text-white transition-colors">{t('nav.products') || 'Products'}</a></li>
-              <li><a href="/cart" className="hover:text-white transition-colors">{t('cart.title') || 'Cart'}</a></li>
-              <li><a href="/login" className="hover:text-white transition-colors">{t('auth.login') || 'Login'}</a></li>
+              <li><a href="/" className="hover:text-white transition-colors">{t('nav.home')}</a></li>
+              <li><a href="/products" className="hover:text-white transition-colors">{t('nav.products')}</a></li>
+              <li><a href="/cart" className="hover:text-white transition-colors">{t('cart.title')}</a></li>
+              <li><a href="/login" className="hover:text-white transition-colors">{t('auth.login')}</a></li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-4">{t('contact_info') || 'Contact Info'}</h4>
+            <h4 className="text-base sm:text-lg font-semibold mb-4">{t('footer.contactInfo')}</h4>
             <div className="space-y-3 text-xs sm:text-sm text-gray-300">
               <div className="flex gap-2 items-start">
                 <Phone size={18} className="mt-0.5 flex-shrink-0" />
@@ -66,7 +66,7 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm text-gray-400 gap-4 sm:gap-0">
-          <p>&copy; {currentYear} {CONTACT_INFO.company_name}. {t('all_rights_reserved') || 'All rights reserved.'}</p>
+          <p>&copy; {currentYear} {CONTACT_INFO.company_name}. {t('footer.allRightsReserved')}</p>
         </div>
       </div>
     </footer>
