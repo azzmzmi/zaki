@@ -100,7 +100,7 @@ export default function AdminPartners() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {t('partners.manageTitle')}
@@ -111,7 +111,7 @@ export default function AdminPartners() {
           </div>
           <Button
             onClick={() => setIsDialogOpen(true)}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
             data-testid="add-partner-button"
           >
             <Plus className="w-4 h-4" />

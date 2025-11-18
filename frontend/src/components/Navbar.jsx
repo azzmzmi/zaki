@@ -161,9 +161,9 @@ export default function Navbar() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <div className="text-sm font-medium cursor-pointer hover:text-blue-600 transition-colors">
                           {i18n.language === "en" ? "English" : "عربي"}
-                        </Button>
+                        </div>
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent

@@ -14866,3 +14866,4 @@ backend/venv/lib/python3.12/site-packages/watchfiles-1.1.0.dist-info/WHEEL
 backend/venv/lib/python3.12/site-packages/watchfiles-1.1.0.dist-info/licenses/LICENSE
 backend/venv/lib64
 backend/venv/pyvenv.cfg
+backend/__pycache__/server.cpython-314.pyc

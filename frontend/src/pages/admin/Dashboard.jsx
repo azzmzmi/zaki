@@ -75,13 +75,13 @@ export default function Dashboard() {
     <AdminLayout>
       <div data-testid="admin-dashboard">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h1 className="text-4xl font-bold" data-testid="dashboard-title">{t('admin.dashboard')}</h1>
-          <div className="flex items-center gap-2">
+          <h1 className="text-3xl sm:text-4xl font-bold" data-testid="dashboard-title">{t('admin.dashboard')}</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
             <span className="text-sm text-gray-600 dark:text-gray-400">{t('admin.timeRange')}</span>
             <select 
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="border rounded-md px-3 py-1 text-sm dark:bg-gray-800 dark:border-gray-700"
+              className="border rounded-md px-3 py-1 text-sm dark:bg-gray-800 dark:border-gray-700 w-full sm:w-auto"
             >
               <option value="7d">{t('admin.last7Days')}</option>
               <option value="30d">{t('admin.last30Days')}</option>

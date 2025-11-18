@@ -486,13 +486,27 @@ async def reset_password(request: PasswordResetConfirm):
     return {"message": "Password has been reset successfully"}
 
 # Category Routes
-@api_router.get("/categories", response_model=List[Category])
-async def get_categories():
-    categories = await db.categories.find({}, {"_id": 0}).to_list(1000)
+@api_router.get("/categories")
+async def get_categories(page: int = 1, limit: int = 12):
+    page = max(1, page)
+    limit = min(limit, 100)
+    skip = (page - 1) * limit
+    
+    total_count = await db.categories.count_documents({})
+    categories = await db.categories.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     for cat in categories:
         if isinstance(cat['created_at'], str):
             cat['created_at'] = datetime.fromisoformat(cat['created_at'])
-    return categories
+    
+    return {
+        "data": [Category(**cat) for cat in categories],
+        "pagination": {
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": (total_count + limit - 1) // limit
+        }
+    }
 
 @api_router.post("/categories", response_model=Category)
 async def create_category(category_data: CategoryCreate, admin: User = Depends(require_admin)):
@@ -526,9 +540,12 @@ async def delete_category(category_id: str, admin: User = Depends(require_admin)
     return {"message": "Category deleted"}
 
 # Product Routes
-@api_router.get("/products", response_model=List[Product])
-async def get_products(category_id: Optional[str] = None, search: Optional[str] = None):
-    # First, get all products matching category and basic search
+@api_router.get("/products")
+async def get_products(category_id: Optional[str] = None, search: Optional[str] = None, page: int = 1, limit: int = 12):
+    # Validate pagination parameters
+    page = max(1, page)
+    limit = min(limit, 100)  # Max 100 per page
+    skip = (page - 1) * limit
     query = {}
     if category_id:
         query["category_id"] = category_id
@@ -563,20 +580,34 @@ async def get_products(category_id: Optional[str] = None, search: Optional[str] 
         
         # Now get the actual products with IDs from both searches
         if product_ids_from_search:
+            final_query = {"id": {"$in": list(product_ids_from_search)}, **({
+            "category_id": category_id} if category_id else {})}
+            total_count = await db.products.count_documents(final_query)
             products = await db.products.find(
-                {"id": {"$in": list(product_ids_from_search)}, **({"category_id": category_id} if category_id else {})},
+                final_query,
                 {"_id": 0}
-            ).to_list(1000)
+            ).skip(skip).limit(limit).to_list(limit)
         else:
+            total_count = 0
             products = []
     else:
         # No search term, just filter by category
-        products = await db.products.find(query, {"_id": 0}).to_list(1000)
+        total_count = await db.products.count_documents(query)
+        products = await db.products.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     
     for prod in products:
         if isinstance(prod['created_at'], str):
             prod['created_at'] = datetime.fromisoformat(prod['created_at'])
-    return products
+    
+    return {
+        "data": [Product(**p) for p in products],
+        "pagination": {
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": (total_count + limit - 1) // limit
+        }
+    }
 
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str):
@@ -620,10 +651,12 @@ async def delete_product(product_id: str, admin: User = Depends(require_admin)):
 
 # Translation Routes
 @api_router.get("/translations/{lang}")
-async def get_translations(lang: str):
+async def get_translations(lang: str, ref_id: Optional[str] = None):
     if lang not in ("en", "ar"):
         raise HTTPException(status_code=400, detail=ERROR_MESSAGES["UNSUPPORTED_LANGUAGE"])
-    entries = await db.translations.find({}, {"_id": 0}).to_list(10000)
+    # Filter by ref_id if provided, otherwise get all translations
+    query = {"ref_id": ref_id} if ref_id else {}
+    entries = await db.translations.find(query, {"_id": 0}).to_list(5000)
     result = {}
     for e in entries:
         val = e.get(lang) or e.get("en") or ""
@@ -638,12 +671,17 @@ async def upsert_translation(entry: TranslationCreate, admin: User = Depends(req
     return {"message": "OK"}
 
 # Order Routes
-@api_router.get("/orders", response_model=List[Order])
-async def get_orders(current_user: User = Depends(get_current_user)):
+@api_router.get("/orders")
+async def get_orders(current_user: User = Depends(get_current_user), page: int = 1, limit: int = 12):
+    page = max(1, page)
+    limit = min(limit, 100)
+    skip = (page - 1) * limit
+    
     query = {} if current_user.role == UserRole.ADMIN else {"user_id": current_user.id}
-    orders = await db.orders.find(query, {"_id": 0}).to_list(1000)
+    total_count = await db.orders.count_documents(query)
+    orders_list = await db.orders.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     result = []
-    for order in orders:
+    for order in orders_list:
         try:
             if isinstance(order.get('created_at'), str):
                 order['created_at'] = datetime.fromisoformat(order['created_at'])
@@ -653,11 +691,20 @@ async def get_orders(current_user: User = Depends(get_current_user)):
                 continue
             # Ensure all required fields are present
             if all(key in order for key in ['id', 'user_id', 'items', 'total', 'shipping_address', 'created_at']):
-                result.append(order)
+                result.append(Order(**order))
         except Exception as e:
             logger.error(f"Error processing order {order.get('id')}: {str(e)}")
             continue
-    return result
+    
+    return {
+        "data": result,
+        "pagination": {
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": (total_count + limit - 1) // limit
+        }
+    }
 
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str, current_user: User = Depends(get_current_user)):
@@ -704,13 +751,27 @@ async def update_order_status(order_id: str, status_update: OrderStatusUpdate, a
     return Order(**updated)
 
 # User Management (Admin)
-@api_router.get("/users", response_model=List[User])
-async def get_users(admin: User = Depends(require_admin)):
-    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+@api_router.get("/users")
+async def get_users(admin: User = Depends(require_admin), page: int = 1, limit: int = 12):
+    page = max(1, page)
+    limit = min(limit, 100)
+    skip = (page - 1) * limit
+    
+    total_count = await db.users.count_documents({})
+    users = await db.users.find({}, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
     for user in users:
         if isinstance(user['created_at'], str):
             user['created_at'] = datetime.fromisoformat(user['created_at'])
-    return users
+    
+    return {
+        "data": [User(**u) for u in users],
+        "pagination": {
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": (total_count + limit - 1) // limit
+        }
+    }
 
 # Analytics (Admin)
 @api_router.get("/analytics")

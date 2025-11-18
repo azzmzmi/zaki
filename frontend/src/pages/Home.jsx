@@ -6,18 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, ShoppingBag, TrendingUp, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productsApi, categoriesApi, api } from '@/lib/api';
+import OptimizedImage from '@/components/OptimizedImage';
 import { getImageUrl } from '@/lib/imageUtils';
 
 export default function Home() {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
-  const PRODUCTS_PER_PAGE = 24;
+  const PRODUCTS_PER_PAGE = 12;
   
   const { data: allProducts } = useQuery({
     queryKey: ['homepage-products'],
     queryFn: async () => {
-      const response = await productsApi.getAll();
-      return (response.data || []).sort((a, b) => b.stock - a.stock);
+      const response = await productsApi.getAll(undefined, undefined, 1, 500);
+      // Handle both old array format and new paginated format
+      const products = response.data?.data || response.data || [];
+      return products.sort((a, b) => b.stock - a.stock);
     }
   });
 
@@ -46,7 +49,9 @@ export default function Home() {
     queryFn: async () => {
       try {
         const response = await api.get('/partners');
-        return response.data || [];
+        const data = response.data || [];
+        // Duplicate the array for continuous carousel effect
+        return [...data, ...data];
       } catch (error) {
         console.error('Failed to fetch partners:', error);
         return [];
@@ -58,7 +63,8 @@ export default function Home() {
     queryKey: ['categories-home'],
     queryFn: async () => {
       const response = await categoriesApi.getAll();
-      return response.data;
+      // Handle both paginated and non-paginated responses
+      return response.data?.data || response.data || [];
     }
   });
 
@@ -105,9 +111,12 @@ export default function Home() {
                     {/* Image Section - Bottom with Gradient Fade */}
                     <div className="absolute bottom-0 left-0 right-0 h-40 flex items-center justify-center overflow-hidden">
                       {/* Background Image or Logo */}
-                      <img
-                        src={cat.image_url ? getImageUrl(cat.image_url) : '/logo.png'}
+                      <OptimizedImage
+                        src={cat.image_url}
                         alt={cat.name}
+                        width={200}
+                        height={200}
+                        quality={70}
                         className={`h-full w-auto object-contain object-center group-hover:scale-110 transition-transform duration-300 ${
                           cat.image_url ? '' : 'opacity-40'
                         }`}
@@ -135,9 +144,8 @@ export default function Home() {
               {t('home.mostPopular')}
             </h2>
 
-            {/* UPDATED RESPONSIVE GRID */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
-                            gap-4 sm:gap-6">
+            {/* UPDATED RESPONSIVE GRID - 12 products per page */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link key={product.id} to={`/products/${product.id}`}>
                   <Card
@@ -145,9 +153,12 @@ export default function Home() {
                     data-testid={`featured-product-${product.id}`}
                   >
                     <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-                      <img
-                        src={getImageUrl(product.image_url)}
+                      <OptimizedImage
+                        src={product.image_url}
                         alt={product.name}
+                        width={400}
+                        height={400}
+                        quality={80}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
@@ -162,37 +173,69 @@ export default function Home() {
               ))}
             </div>
 
-            {/* UPDATED MOBILE-FRIENDLY PAGINATION */}
+            {/* UPDATED MOBILE-FRIENDLY PAGINATION - 12 products per page */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-center 
-                              gap-3 sm:gap-4 mt-12">
-                
-                <Button
-                  variant="outline"
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                  className="gap-2 w-full sm:w-auto"
-                  data-testid="prev-page-button"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  {t('pagination.previous')}
-                </Button>
-
-                <div className="text-sm font-medium" data-testid="pagination-info">
-                  {t('pagination.page')} {currentPage} {t('pagination.of')} {totalPages}
+              <div className="flex items-center justify-between pt-12">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('pagination.page')} {currentPage} {t('pagination.of')} {totalPages} • {totalProducts}{' '}
+                  {totalProducts === 1 ? 'item' : 'items'}
                 </div>
 
-                <Button
-                  variant="outline"
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                  className="gap-2 w-full sm:w-auto"
-                  data-testid="next-page-button"
-                >
-                  {t('pagination.next')}
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className="gap-1"
+                    data-testid="prev-page-button"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    {t('pagination.previous')}
+                  </Button>
 
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            setCurrentPage(pageNum);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="w-10"
+                          data-testid={`featured-page-${pageNum}`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="gap-1"
+                    data-testid="next-page-button"
+                  >
+                    {t('pagination.next')}
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -200,80 +243,49 @@ export default function Home() {
       )}
 
       {/* Logo Carousel */}
-      <section className="py-16 px-4 bg-gradient-to-r from-gray-50 to-gray-100 
-                          dark:from-gray-900 dark:to-gray-800"
-               data-testid="logo-carousel">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-12 text-center text-gray-900 dark:text-white">
-            {t('home.ourPartners')}
-          </h2>
+      {partners.length > 0 && (
+        <section className="py-16 px-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800" data-testid="logo-carousel">
+          <style>{`
+            @keyframes slidePartners {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(calc(-100%)); }
+            }
+            
+            .partnerscard {
+              animation: slidePartners 15s linear infinite;
+            }
+            
+            .partnerscard:hover {
+              animation-play-state: paused;
+            }
+          `}</style>
+          
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-12 text-center text-gray-900 dark:text-white">
+              {t('home.ourPartners')}
+            </h2>
 
-          <div className="relative overflow-hidden" style={{ height: '120px' }}>
-            <style>{`
-              @keyframes scrollLogos {
-                0% { transform: translateX(0); }
-                100% { transform: translateX(calc(-100% / 2)); }
-              }
-
-              .logo-carousel-container {
-                display: flex;
-                animation: scrollLogos 30s linear infinite;
-              }
-
-              .logo-carousel-container:hover {
-                animation-play-state: paused;
-              }
-
-              .logo-item {
-                flex: 0 0 calc(100% / 3);
-                min-width: 100px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 10px;
-                opacity: 0.6;
-                transition: opacity 0.3s ease;
-              }
-
-              @media (min-width: 640px) { 
-                .logo-item { flex: 0 0 calc(100% / 5); }
-              }
-
-              @media (min-width: 1024px) { 
-                .logo-item { flex: 0 0 calc(100% / 8); }
-              }
-
-              .logo-item:hover { opacity: 1; }
-
-              .logo-item img {
-                max-height: 100px;
-                max-width: 140px;
-                object-fit: contain;
-                filter: brightness(0.9) contrast(1.1);
-              }
-
-              .logo-item:hover img {
-                filter: brightness(1) contrast(1.2);
-              }
-            `}</style>
-
-            <div className="logo-carousel-container">
-              {partners.length > 0 &&
-                [...partners, ...partners].map((partner, idx) => (
-                  <div key={`${partner.id}-${idx}`} className="logo-item">
-                    <img
-                      src={getImageUrl(partner.logo_url)}
-                      alt={partner.name}
-                      title={partner.name}
-                    />
-                  </div>
+            <div className="overflow-hidden" data-testid="partners-slider">
+              <ul className="partnerscard flex gap-8 sm:gap-12 lg:gap-16 justify-center items-center" role="list">
+                {partners.map((partner, idx) => (
+                  <li key={`partner-${partner.id}-${idx}`} className="flex-shrink-0 flex items-center justify-center" style={{ minWidth: '120px', height: '80px' }}>
+                    <div className="w-full h-full flex items-center justify-center hover:opacity-100 opacity-70 transition-opacity duration-300">
+                      <img
+                        src={getImageUrl(partner.logo_url)}
+                        alt={partner.name}
+                        title={partner.name}
+                        loading="lazy"
+                        className="max-w-full max-h-full object-contain"
+                        style={{ filter: 'brightness(0.9) contrast(1.1)', transition: 'filter 0.3s ease' }}
+                      />
+                    </div>
+                  </li>
                 ))}
+              </ul>
             </div>
-
           </div>
-        </div>
-      </section>
-
+        </section>
+      )}
     </div>
   );
 }

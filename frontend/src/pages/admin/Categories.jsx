@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { categoriesApi, translationsApi, uploadApi } from '@/lib/api';
-import { getImageUrl } from '@/lib/imageUtils';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Upload } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
+import DataTable from '@/components/DataTable';
+import OptimizedImage from '@/components/OptimizedImage';
 import i18n from '@/i18n';
 
 export default function AdminCategories() {
@@ -21,14 +21,24 @@ export default function AdminCategories() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '', name_ar: '', description_ar: '', image_url: '' });
   const [uploading, setUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ['admin-categories'],
+  const { data: categoriesResponse, isLoading } = useQuery({
+    queryKey: ['admin-categories', currentPage],
     queryFn: async () => {
-      const response = await categoriesApi.getAll();
+      const response = await categoriesApi.getAll(currentPage, ITEMS_PER_PAGE);
       return response.data;
     }
   });
+
+  const categories = categoriesResponse?.data || [];
+  const pagination = categoriesResponse?.pagination;
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const createMutation = useMutation({
     mutationFn: (data) => categoriesApi.create(data),
@@ -42,6 +52,7 @@ export default function AdminCategories() {
       i18n.addResource('ar', 'translation', `entity.category.${category.id}.description`, formData.description_ar || category.description || '');
       toast.success(t('category.created'));
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      setCurrentPage(1);
       handleCloseDialog();
     },
     onError: () => toast.error(t('category.createFailed'))
@@ -77,9 +88,9 @@ export default function AdminCategories() {
   const handleOpenDialog = async (category) => {
     if (category) {
       setEditingCategory(category);
-      // Fetch existing Arabic translations
+      // Fetch only this category's translations
       try {
-        const arTranslations = await translationsApi.getByLang('ar');
+        const arTranslations = await translationsApi.getByLang('ar', category.id);
         const nameKey = `entity.category.${category.id}.name`;
         const descKey = `entity.category.${category.id}.description`;
         const arName = arTranslations.data[nameKey] || '';
@@ -131,53 +142,76 @@ export default function AdminCategories() {
     }
   };
 
+  const columns = [
+    {
+      key: 'image_url',
+      label: t('category.image'),
+      render: (value) => (
+        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0 flex items-center justify-center">
+          {value ? (
+            <OptimizedImage src={value} alt="" width={48} height={48} quality={60} className="w-full h-full object-contain" />
+          ) : (
+            <span className="text-xs text-gray-400">No image</span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'name',
+      label: t('category.name'),
+      render: (_, row) => t(`entity.category.${row.id}.name`, { defaultValue: row.name })
+    },
+    {
+      key: 'description',
+      label: t('category.description'),
+      render: (value, row) => t(`entity.category.${row.id}.description`, { defaultValue: value || '' }).substring(0, 50) + '...'
+    }
+  ];
+
+  const actions = (row) => (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => handleOpenDialog(row)}
+        data-testid={`edit-category-${row.id}`}
+      >
+        <Pencil className="w-4 h-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => deleteMutation.mutate(row.id)}
+        data-testid={`delete-category-${row.id}`}
+      >
+        <Trash2 className="w-4 h-4 text-red-500" />
+      </Button>
+    </>
+  );
+
   return (
     <AdminLayout>
       <div data-testid="admin-categories-page">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold" data-testid="admin-categories-title">{t('admin.categories')}</h1>
-          <Button onClick={() => handleOpenDialog()} data-testid="add-category-button">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold" data-testid="admin-categories-title">{t('admin.categories')}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{t('admin.manageYourCategories')}</p>
+          </div>
+          <Button onClick={() => handleOpenDialog()} data-testid="add-category-button" className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             {t('admin.addCategory')}
           </Button>
         </div>
 
-        {isLoading ? (
-          <div data-testid="loading-indicator">{t('common.loading')}</div>
-        ) : (
-          <div className="grid gap-4">
-            {categories?.map((category) => (
-              <Card key={category.id} className="p-4" data-testid={`category-row-${category.id}`}>
-                <div className="flex items-center gap-4 justify-between">
-                  {/* Category Image */}
-                  {category.image_url && (
-                    <div className="flex-shrink-0">
-                      <img
-                        src={getImageUrl(category.image_url)}
-                        alt={category.name}
-                        className="h-20 w-20 object-contain rounded"
-                      />
-                    </div>
-                  )}
-                  {/* Category Info */}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg" data-testid={`category-name-${category.id}`}>{t(`entity.category.${category.id}.name`, { defaultValue: category.name })}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t(`entity.category.${category.id}.description`, { defaultValue: category.description })  }</p>
-                  </div>
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 flex-shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(category)} data-testid={`edit-category-${category.id}`}>
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => deleteMutation.mutate(category.id)} data-testid={`delete-category-${category.id}`}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+        <DataTable
+          data={categories}
+          columns={columns}
+          isLoading={isLoading}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          actions={actions}
+          rowKey="id"
+        />
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent data-testid="category-dialog">
@@ -186,20 +220,20 @@ export default function AdminCategories() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label>{t('category.name')} {t('form.required')}</Label>
-                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required data-testid="category-name-input" />
+                <Label htmlFor="category-name">{t('category.name')} {t('form.required')}</Label>
+                <Input id="category-name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required data-testid="category-name-input" />
               </div>
               <div>
-                <Label>{t('category.description')}</Label>
-                <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} data-testid="category-description-input" />
+                <Label htmlFor="category-description">{t('category.description')}</Label>
+                <Textarea id="category-description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} data-testid="category-description-input" />
               </div>
               <div>
-                <Label>{t('category.arabicName')}</Label>
-                <Input dir="rtl" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} data-testid="category-ar-name-input" />
+                <Label htmlFor="category-ar-name">{t('category.arabicName')}</Label>
+                <Input id="category-ar-name" dir="rtl" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} data-testid="category-ar-name-input" />
               </div>
               <div>
-                <Label>{t('category.arabicDescription')}</Label>
-                <Textarea dir="rtl" value={ formData.description_ar } onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} data-testid="category-ar-description-input" />
+                <Label htmlFor="category-ar-description">{t('category.arabicDescription')}</Label>
+                <Textarea id="category-ar-description" dir="rtl" value={ formData.description_ar } onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} data-testid="category-ar-description-input" />
               </div>
               <div>
                 <Label>{t('category.image')}</Label>
@@ -226,7 +260,7 @@ export default function AdminCategories() {
                   {formData.image_url && (
                     <div className="mt-4">
                       <p className="text-sm font-medium mb-2">{t('category.imagePreview')}</p>
-                      <img src={getImageUrl(formData.image_url)} alt="Category preview" className="max-h-40 max-w-full object-contain rounded border border-gray-200 dark:border-gray-700" />
+                      <OptimizedImage src={formData.image_url} alt="Category preview" width={160} height={160} quality={70} className="max-h-40 max-w-full object-contain rounded border border-gray-200 dark:border-gray-700" />
                     </div>
                   )}
                 </div>
