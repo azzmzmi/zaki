@@ -11,7 +11,7 @@ import { productsApi, categoriesApi } from '@/lib/api';
 import { Search } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { toast } from 'sonner';
-import { getImageUrl } from '@/lib/imageUtils';
+import OptimizedImage from '@/components/OptimizedImage';
 
 export default function Products() {
   const { t } = useTranslation();
@@ -20,50 +20,54 @@ export default function Products() {
   const initialCategory = searchParams.get('category') || 'all';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
   const addItem = useCartStore(state => state.addItem);
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await categoriesApi.getAll();
-      return response.data;
+      // Handle both paginated and non-paginated responses
+      return response.data?.data || response.data || [];
     }
   });
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ['products', selectedCategory, search, sortBy],
+    queryKey: ['products', selectedCategory, search, sortBy, currentPage],
     queryFn: async () => {
       const response = await productsApi.getAll(
         selectedCategory === 'all' ? undefined : selectedCategory,
-        search || undefined
+        search || undefined,
+        currentPage,
+        ITEMS_PER_PAGE
       );
-      let sortedProducts = response.data || [];
+      let result = response.data.data || [];
+      const pagination = response.data.pagination;
 
       // Apply sorting
       switch (sortBy) {
         case 'price-asc':
-          sortedProducts.sort((a, b) => a.price - b.price);
+          result.sort((a, b) => a.price - b.price);
           break;
         case 'price-desc':
-          sortedProducts.sort((a, b) => b.price - a.price);
+          result.sort((a, b) => b.price - a.price);
           break;
         case 'popular':
-          // Sort by stock (assuming more stock = more popular, or could use sales count if available)
-          sortedProducts.sort((a, b) => b.stock - a.stock);
+          result.sort((a, b) => b.stock - a.stock);
           break;
         case 'stock':
-          sortedProducts.sort((a, b) => b.stock - a.stock);
+          result.sort((a, b) => b.stock - a.stock);
           break;
         case 'newest':
         default:
-          // If created_at exists, sort by that, otherwise keep original order
-          if (sortedProducts.length > 0 && sortedProducts[0].created_at) {
-            sortedProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          if (result.length > 0 && result[0].created_at) {
+            result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           }
           break;
       }
 
-      return sortedProducts;
+      return { products: result, pagination };
     }
   });
 
@@ -123,15 +127,19 @@ export default function Products() {
       {/* Products Grid */}
       {isLoading ? (
         <div className="text-center py-12" data-testid="loading-indicator">{t('common.loading')}</div>
-      ) : products && products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="products-grid">
-          {products.map((product) => (
+      ) : products?.products && products.products.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="products-grid">
+            {products.products.map((product) => (
             <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group" data-testid={`product-card-${product.id}`}>
               <Link to={`/products/${product.id}`}>
                 <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-                  <img
-                    src={getImageUrl(product.image_url)}
+                  <OptimizedImage
+                    src={product.image_url}
                     alt={t(`entity.product.${product.id}.name`, { defaultValue: product.name })}
+                    width={400}
+                    height={400}
+                    quality={75}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
@@ -155,7 +163,67 @@ export default function Products() {
               </div>
             </Card>
           ))}
-        </div>
+          </div>
+          
+          {/* Pagination */}
+          {products?.pagination && products.pagination.pages > 1 && (
+            <div className="flex items-center justify-between pt-12">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {t('pagination.page')} {products.pagination.page} {t('pagination.of')} {products.pagination.pages} • {products.pagination.total}{' '}
+                {products.pagination.total === 1 ? 'item' : 'items'}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  data-testid="pagination-prev"
+                >
+                  {t('pagination.previous')}
+                </Button>
+
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(products.pagination.pages, 5) }, (_, i) => {
+                    let pageNum;
+                    if (products.pagination.pages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= products.pagination.pages - 2) {
+                      pageNum = products.pagination.pages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-10"
+                        data-testid={`pagination-page-${pageNum}`}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(products.pagination.pages, p + 1))}
+                  disabled={currentPage === products.pagination.pages}
+                  data-testid="pagination-next"
+                >
+                  {t('pagination.next')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-12 text-gray-500" data-testid="no-products">No products found</div>
       )}

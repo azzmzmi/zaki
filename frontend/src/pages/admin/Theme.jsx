@@ -221,7 +221,7 @@ export default function AdminTheme() {
           {/* Preview */}
           <div className="mt-8 pt-8 border-t">
             <h3 className="text-lg font-semibold mb-4">{t('theme.preview') || 'Preview'}</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <button
                 className="px-6 py-2 text-white rounded font-semibold"
                 style={{ backgroundColor: primaryColor }}

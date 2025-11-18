@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ordersApi } from '@/lib/api';
 import { toast } from 'sonner';
 import AdminLayout from '@/components/AdminLayout';
+import DataTable from '@/components/DataTable';
 import { ChevronDown, Eye, Check, X, Clock } from 'lucide-react';
 
 export default function AdminOrders() {
@@ -15,16 +16,26 @@ export default function AdminOrders() {
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['admin-orders'],
+  const { data: ordersResponse, isLoading } = useQuery({
+    queryKey: ['admin-orders', currentPage],
     queryFn: async () => {
-      const response = await ordersApi.getAll();
+      const response = await ordersApi.getAll(currentPage, ITEMS_PER_PAGE);
       return response.data;
     }
   });
 
-  // Filter and sort orders
+  const orders = ordersResponse?.data || [];
+  const pagination = ordersResponse?.pagination;
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Filter and sort orders (client-side filtering on current page)
   const filteredAndSortedOrders = orders ? orders
     .filter(order => filterStatus === 'all' || order.status === filterStatus)
     .sort((a, b) => {
@@ -78,7 +89,7 @@ export default function AdminOrders() {
   };
 
   const stats = {
-    total: orders?.length || 0,
+    total: pagination?.total || 0,
     pending: orders?.filter(o => o.status === 'pending').length || 0,
     processing: orders?.filter(o => o.status === 'processing').length || 0,
     shipped: orders?.filter(o => o.status === 'shipped').length || 0,
@@ -89,12 +100,12 @@ export default function AdminOrders() {
     <AdminLayout>
       <div data-testid="admin-orders-page" className="space-y-6">
         <div>
-          <h1 className="text-4xl font-bold mb-2" data-testid="admin-orders-title">{t('admin.orders')}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2" data-testid="admin-orders-title">{t('admin.orders')}</h1>
           <p className="text-gray-600 dark:text-gray-400">{t('orders.manageDesc')}</p>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('orders.totalOrders')}</span>
@@ -128,11 +139,11 @@ export default function AdminOrders() {
         </div>
 
         {/* Filters and Sorting */}
-        <Card className="p-4 flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">{t('orders.filterByStatus')}</label>
+        <Card className="p-3 sm:p-4 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-start sm:items-center">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+            <label className="text-sm font-medium whitespace-nowrap">{t('orders.filterByStatus')}</label>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -146,10 +157,10 @@ export default function AdminOrders() {
             </Select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">{t('orders.sortBy')}</label>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+            <label className="text-sm font-medium whitespace-nowrap">{t('orders.sortBy')}</label>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -170,36 +181,37 @@ export default function AdminOrders() {
             {t('orders.noOrdersFound')}
           </Card>
         ) : (
-          <div className="grid gap-4">
-            {filteredAndSortedOrders.map((order) => (
+          <>
+            <div className="grid gap-4">
+              {filteredAndSortedOrders.map((order) => (
               <Card key={order.id} className="overflow-hidden" data-testid={`order-row-${order.id}`}>
                 {/* Order Header */}
                 <div 
-                  className="p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 flex justify-between items-center transition-colors"
+                  className="p-3 sm:p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-colors"
                   onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4">
+                  <div className="flex-1 w-full">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                       <div>
-                        <h3 className="font-semibold text-lg" data-testid={`order-id-${order.id}`}>
+                        <h3 className="font-semibold text-sm sm:text-lg" data-testid={`order-id-${order.id}`}>
                           {t('orders.orderNumber', { id: order.id.slice(0, 8) })}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                           {new Date(order.created_at).toLocaleString()}
                         </p>
                       </div>
-                      <div className="ml-auto flex items-center gap-4">
+                      <div className="ml-auto sm:ml-auto flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                         <div className="text-right">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{t('orders.totalAmount')}</p>
-                          <p className="text-2xl font-bold text-blue-600" data-testid={`order-total-${order.id}`}>
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('orders.totalAmount')}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-blue-600" data-testid={`order-total-${order.id}`}>
                             ${order.total.toFixed(2)}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2 ${getStatusColor(order.status)}`} data-testid={`order-status-${order.id}`}>
+                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-1 sm:gap-2 flex-shrink-0 ${getStatusColor(order.status)}`} data-testid={`order-status-${order.id}`}>
                           {getStatusIcon(order.status)}
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          <span className="hidden sm:inline">{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
                         </span>
-                        <ChevronDown className={`w-5 h-5 transition-transform ${expandedOrder === order.id ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 ${expandedOrder === order.id ? 'rotate-180' : ''}`} />
                       </div>
                     </div>
                   </div>
@@ -207,7 +219,7 @@ export default function AdminOrders() {
 
                 {/* Order Details (Expanded) */}
                 {expandedOrder === order.id && (
-                  <div className="border-t px-6 py-6 bg-gray-50 dark:bg-gray-800/50 space-y-6">
+                  <div className="border-t px-3 sm:px-6 py-4 sm:py-6 bg-gray-50 dark:bg-gray-800/50 space-y-4 sm:space-y-6">
                     {/* Order Items */}
                     <div>
                       <h4 className="font-semibold mb-3">{t('orders.items')}</h4>
@@ -240,14 +252,14 @@ export default function AdminOrders() {
                     </div>
 
                     {/* Status Management */}
-                    <div className="border-t pt-6">
-                      <h4 className="font-semibold mb-3">{t('orders.updateStatus')}</h4>
-                      <div className="flex gap-2 flex-wrap">
+                    <div className="border-t pt-4 sm:pt-6">
+                      <h4 className="font-semibold mb-3 text-sm sm:text-base">{t('orders.updateStatus')}</h4>
+                      <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
                         <Select
                           value={order.status}
                           onValueChange={(status) => updateStatusMutation.mutate({ id: order.id, status })}
                         >
-                          <SelectTrigger className="w-48" data-testid={`order-status-select-${order.id}`}>
+                          <SelectTrigger className="w-full sm:w-48" data-testid={`order-status-select-${order.id}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -263,7 +275,7 @@ export default function AdminOrders() {
                         {order.status === 'pending' && (
                           <Button 
                             onClick={() => updateStatusMutation.mutate({ id: order.id, status: 'processing' })}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                           >
                             <Check className="w-4 h-4 mr-2" />
                             {t('orders.approveOrder')}
@@ -272,7 +284,7 @@ export default function AdminOrders() {
                         {order.status === 'processing' && (
                           <Button 
                             onClick={() => updateStatusMutation.mutate({ id: order.id, status: 'shipped' })}
-                            className="bg-purple-600 hover:bg-purple-700"
+                            className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
                           >
                             <Eye className="w-4 h-4 mr-2" />
                             {t('orders.markShipped')}
@@ -281,7 +293,7 @@ export default function AdminOrders() {
                         {order.status === 'shipped' && (
                           <Button 
                             onClick={() => updateStatusMutation.mutate({ id: order.id, status: 'delivered' })}
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                           >
                             <Check className="w-4 h-4 mr-2" />
                             {t('orders.markDelivered')}
@@ -290,7 +302,7 @@ export default function AdminOrders() {
                         {(order.status === 'pending' || order.status === 'processing') && (
                           <Button 
                             onClick={() => updateStatusMutation.mutate({ id: order.id, status: 'cancelled' })}
-                            className="bg-red-600 hover:bg-red-700"
+                            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                           >
                             <X className="w-4 h-4 mr-2" />
                             {t('orders.cancelOrder')}
@@ -302,7 +314,69 @@ export default function AdminOrders() {
                 )}
               </Card>
             ))}
-          </div>
+            </div>
+
+            {/* Pagination */}
+            {pagination && pagination.pages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 sm:pt-12">
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
+                  {t('pagination.page')} {pagination.page} {t('pagination.of')} {pagination.pages} • {pagination.total}{' '}
+                  {pagination.total === 1 ? 'order' : 'orders'}
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap justify-center w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                    data-testid="pagination-prev"
+                  >
+                    <ChevronDown className="w-4 h-4 rotate-90" />
+                    {t('pagination.previous')}
+                  </Button>
+
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(pagination.pages, 5) }, (_, i) => {
+                      let pageNum;
+                      if (pagination.pages <= 5) {
+                        pageNum = i + 1;
+                      } else if (pagination.page <= 3) {
+                        pageNum = i + 1;
+                      } else if (pagination.page >= pagination.pages - 2) {
+                        pageNum = pagination.pages - 4 + i;
+                      } else {
+                        pageNum = pagination.page - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={pagination.page === pageNum ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          className="w-10"
+                          data-testid={`pagination-page-${pageNum}`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={pagination.page === pagination.pages}
+                    data-testid="pagination-next"
+                  >
+                    {t('pagination.next')}
+                    <ChevronDown className="w-4 h-4 -rotate-90" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </AdminLayout>

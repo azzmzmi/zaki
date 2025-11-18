@@ -23,6 +23,7 @@ const resources = {
       'common.sending': 'Sending...',
       'common.resetting': 'Resetting...',
       'common.saving': 'Saving...',
+      'common.actions': 'Actions',
       
       // Navigation
       'nav.home': 'Home',
@@ -457,8 +458,8 @@ const resources = {
       'common.sending': 'جاري الإرسال...',
       'common.resetting': 'جاري التغيير...',
       'common.saving': 'جاري الحفظ...',
+      'common.actions': 'الإجراءات',
       
-      // Navigation
       'nav.home': 'الرئيسية',
       'nav.products': 'المنتجات',
       'nav.cart': 'السلة',
@@ -772,12 +773,17 @@ i18n
     }
   });
 
-// Load dynamic translations from backend
-translationsApi.getByLang('en').then(res => {
-  i18n.addResourceBundle('en', 'translation', res.data, true, true);
-}).catch(() => {});
-translationsApi.getByLang('ar').then(res => {
-  i18n.addResourceBundle('ar', 'translation', res.data, true, true);
-}).catch(() => {});
+// Load dynamic translations from backend (only once)
+let translationsLoaded = false;
+
+if (!translationsLoaded) {
+  translationsLoaded = true;
+  translationsApi.getByLang('en').then(res => {
+    i18n.addResourceBundle('en', 'translation', res.data, true, true);
+  }).catch(() => {});
+  translationsApi.getByLang('ar').then(res => {
+    i18n.addResourceBundle('ar', 'translation', res.data, true, true);
+  }).catch(() => {});
+}
 
 export default i18n;

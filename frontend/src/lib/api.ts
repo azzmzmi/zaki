@@ -45,10 +45,12 @@ export const authApi = {
 
 // Products API
 export const productsApi = {
-  getAll: (categoryId?: string, search?: string) => {
+  getAll: (categoryId?: string, search?: string, page: number = 1, limit: number = 10) => {
     const params = new URLSearchParams();
     if (categoryId) params.append('category_id', categoryId);
     if (search) params.append('search', search);
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
     return api.get(`/products?${params.toString()}`);
   },
   getById: (id: string) => api.get(`/products/${id}`),
@@ -59,7 +61,12 @@ export const productsApi = {
 
 // Categories API
 export const categoriesApi = {
-  getAll: () => api.get('/categories'),
+  getAll: (page: number = 1, limit: number = 10) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    return api.get(`/categories?${params.toString()}`);
+  },
   create: (data: any) => api.post('/categories', data),
   update: (id: string, data: any) => api.put(`/categories/${id}`, data),
   delete: (id: string) => api.delete(`/categories/${id}`)
@@ -67,7 +74,12 @@ export const categoriesApi = {
 
 // Orders API
 export const ordersApi = {
-  getAll: () => api.get('/orders'),
+  getAll: (page: number = 1, limit: number = 10) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    return api.get(`/orders?${params.toString()}`);
+  },
   getById: (id: string) => api.get(`/orders/${id}`),
   create: (data: any) => api.post('/orders', data),
   updateStatus: (id: string, status: string) => 
@@ -76,7 +88,12 @@ export const ordersApi = {
 
 // Users API
 export const usersApi = {
-  getAll: () => api.get('/users')
+  getAll: (page: number = 1, limit: number = 10) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    return api.get(`/users?${params.toString()}`);
+  }
 };
 
 // Analytics API
@@ -97,7 +114,7 @@ export const uploadApi = {
 
 // Translations API
 export const translationsApi = {
-  getByLang: (lang: string) => api.get(`/translations/${lang}`),
+  getByLang: (lang: string, refId?: string) => api.get(`/translations/${lang}`, { params: refId ? { ref_id: refId } : {} }),
   upsert: (payload: { key: string; en: string; ar: string; type?: string; ref_id?: string }) => api.post('/translations', payload)
 };
 

@@ -189,7 +189,7 @@ export default function Checkout() {
             </Card>
           </div>
 
-          <div>
+          <div className="lg:col-span-1">
             <Card className="p-4 sm:p-6 sticky top-24">
               <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
               <div className="space-y-4 mb-6">

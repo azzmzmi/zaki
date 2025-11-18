@@ -79,8 +79,9 @@ export default function Profile() {
 
             <div className="space-y-4">
               <div>
-                <Label>{t('profile.email') || 'Email'}</Label>
+                <Label htmlFor="email">{t('profile.email') || 'Email'}</Label>
                 <Input
+                  id="email"
                   type="email"
                   value={user.email}
                   disabled
@@ -100,8 +101,9 @@ export default function Profile() {
               </div>
 
               <div>
-                <Label>{t('profile.role') || 'Role'}</Label>
+                <Label htmlFor="role">{t('profile.role') || 'Role'}</Label>
                 <Input
+                  id="role"
                   type="text"
                   value={user.role}
                   disabled
@@ -141,7 +143,7 @@ export default function Profile() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 justify-end pt-4">
             <Button
               type="button"
               variant="outline"
