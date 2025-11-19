@@ -63,7 +63,7 @@ export default function Login() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loginMutation.isPending} data-testid="login-submit-button">
-            {loginMutation.isPending ? 'Logging in...' : t('auth.login')}
+            {loginMutation.isPending ? t('auth.loggingIn') : t('auth.login')}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">

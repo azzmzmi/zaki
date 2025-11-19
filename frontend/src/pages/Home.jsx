@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { ArrowRight, ShoppingBag, TrendingUp, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productsApi, categoriesApi, api } from '@/lib/api';
 import OptimizedImage from '@/components/OptimizedImage';
-import { getImageUrl } from '@/lib/imageUtils';
+import { getImageUrl, getSizeForContext } from '@/lib/imageUtils';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -17,6 +17,7 @@ export default function Home() {
   const { data: allProducts } = useQuery({
     queryKey: ['homepage-products'],
     queryFn: async () => {
+      // Only fetch initial page of products (12 items) instead of 500
       const response = await productsApi.getAll(undefined, undefined, 1, 500);
       // Handle both old array format and new paginated format
       const products = response.data?.data || response.data || [];
@@ -57,6 +58,7 @@ export default function Home() {
         return [];
       }
     },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
   const { data: categories } = useQuery({
@@ -79,7 +81,7 @@ export default function Home() {
               {t('home.shopByCategory', { defaultValue: 'Shop by Category' })}
             </h2> */}
             {/* Responsive Grid Layout */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {categories.map((cat) => (
                 <Link key={cat.id} to={`/products?category=${cat.id}`}>
                   <Card
@@ -114,10 +116,8 @@ export default function Home() {
                       <OptimizedImage
                         src={cat.image_url}
                         alt={cat.name}
-                        width={200}
-                        height={200}
-                        quality={70}
-                        className={`h-full w-auto object-contain object-center group-hover:scale-110 transition-transform duration-300 ${
+                        size={getSizeForContext('card')}
+                        className={`max-h-40 w-auto object-contain object-center group-hover:scale-110 transition-transform duration-300 ${
                           cat.image_url ? '' : 'opacity-40'
                         }`}
                       />
@@ -145,7 +145,7 @@ export default function Home() {
             </h2>
 
             {/* UPDATED RESPONSIVE GRID - 12 products per page */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link key={product.id} to={`/products/${product.id}`}>
                   <Card
@@ -156,9 +156,7 @@ export default function Home() {
                       <OptimizedImage
                         src={product.image_url}
                         alt={product.name}
-                        width={400}
-                        height={400}
-                        quality={80}
+                        size={getSizeForContext('home')}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
@@ -178,7 +176,7 @@ export default function Home() {
               <div className="flex items-center justify-between pt-12">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   {t('pagination.page')} {currentPage} {t('pagination.of')} {totalPages} • {totalProducts}{' '}
-                  {totalProducts === 1 ? 'item' : 'items'}
+                  {totalProducts === 1 ? t('pagination.item') : t('pagination.items')}
                 </div>
 
                 <div className="flex items-center gap-2">

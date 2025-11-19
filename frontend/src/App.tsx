@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from './store/authStore';
 import './i18n';
 import './App.css';
 
@@ -17,15 +18,24 @@ import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminProducts from './pages/admin/Products';
-import AdminCategories from './pages/admin/Categories';
-import AdminOrders from './pages/admin/Orders';
-import AdminUsers from './pages/admin/Users';
-import AdminTheme from './pages/admin/Theme';
-import Partners from './pages/admin/Partners';
 import Profile from './pages/Profile';
-import { useAuthStore } from './store/authStore';
+
+// Lazy load admin pages for better performance
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminProducts = lazy(() => import('./pages/admin/Products'));
+const AdminCategories = lazy(() => import('./pages/admin/Categories'));
+const AdminOrders = lazy(() => import('./pages/admin/Orders'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminTheme = lazy(() => import('./pages/admin/Theme'));
+const Partners = lazy(() => import('./pages/admin/Partners'));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,40 +117,53 @@ function App() {
                   </ProtectedRoute>
                 } />
                 
-                {/* Admin Routes */}
                 <Route path="/admin" element={
                   <ProtectedRoute adminOnly>
-                    <AdminDashboard />
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminDashboard />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/products" element={
                   <ProtectedRoute adminOnly>
-                    <AdminProducts />
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminProducts />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/categories" element={
                   <ProtectedRoute adminOnly>
-                    <AdminCategories />
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminCategories />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/orders" element={
                   <ProtectedRoute adminOnly>
-                    <AdminOrders />
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminOrders />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/users" element={
                   <ProtectedRoute adminOnly>
-                    <AdminUsers />
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminUsers />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/theme" element={
                   <ProtectedRoute adminOnly>
-                    <AdminTheme />
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminTheme />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/partners" element={
                   <ProtectedRoute adminOnly>
-                    <Partners />
+                    <Suspense fallback={<PageLoader />}>
+                      <Partners />
+                    </Suspense>
                   </ProtectedRoute>
                 } />
               </Routes>

@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
-import { getOptimizedImageUrl, supportsWebP, getImageUrl } from '@/lib/imageUtils';
+import { getOptimizedImageUrl, supportsWebP, getImageUrl, getSizeForContext } from '@/lib/imageUtils';
 
 /**
  * OptimizedImage Component
  * Automatically serves WebP to supported browsers with PNG/JPEG fallback
  * Includes lazy loading, error handling, and responsive sizing
+ * Supports both explicit dimensions and preset sizes
  * 
  * Usage:
+ * <OptimizedImage 
+ *   src="image-url" 
+ *   alt="description"
+ *   size="grid" // Uses preset: 200x200, quality: 75
+ * />
+ * OR
  * <OptimizedImage 
  *   src="image-url" 
  *   alt="description"
@@ -14,13 +21,21 @@ import { getOptimizedImageUrl, supportsWebP, getImageUrl } from '@/lib/imageUtil
  *   height={400}
  *   quality={80}
  * />
+ * 
+ * Size presets:
+ * - 'thumbnail': 80x80, q:70 (admin tables)
+ * - 'small': 200x200, q:75 (grids, cards)
+ * - 'medium': 400x400, q:80 (home page)
+ * - 'large': 600x600, q:85 (detail preview)
+ * - 'full': 1200x800, q:90 (product detail page)
  */
 export default function OptimizedImage({
   src,
   alt,
   width,
   height,
-  quality = 80,
+  quality,
+  size,
   className = '',
   onLoad,
   onError,
@@ -39,7 +54,23 @@ export default function OptimizedImage({
     }
 
     try {
-      const optimized = getOptimizedImageUrl(src, { width, height, quality });
+      // Determine optimization options
+      let options = {};
+      
+      if (size) {
+        // Use preset size
+        options.size = size;
+      } else if (width || height || quality !== undefined) {
+        // Use explicit dimensions
+        if (width) options.width = width;
+        if (height) options.height = height;
+        if (quality !== undefined) options.quality = quality;
+      } else {
+        // Default to medium size
+        options.size = 'medium';
+      }
+      
+      const optimized = getOptimizedImageUrl(src, options);
       // Use WebP if supported, otherwise use fallback
       const urlToUse = webpSupported ? optimized.webp : optimized.fallback;
       setImageSrc(urlToUse);
@@ -47,7 +78,7 @@ export default function OptimizedImage({
       console.error('Error optimizing image:', error);
       setImageSrc(getImageUrl(src));
     }
-  }, [src, width, height, quality, webpSupported]);
+  }, [src, width, height, quality, size, webpSupported]);
 
   const handleLoad = (e) => {
     setIsLoading(false);
@@ -60,9 +91,19 @@ export default function OptimizedImage({
     setHasError(true);
     
     // Try fallback if WebP failed
-    if (webpSupported && imageSrc.includes('fmt=webp')) {
+    if (webpSupported && imageSrc && imageSrc.includes('fmt=webp')) {
       try {
-        const optimized = getOptimizedImageUrl(src, { width, height, quality });
+        let options = {};
+        if (size) {
+          options.size = size;
+        } else if (width || height || quality !== undefined) {
+          if (width) options.width = width;
+          if (height) options.height = height;
+          if (quality !== undefined) options.quality = quality;
+        } else {
+          options.size = 'medium';
+        }
+        const optimized = getOptimizedImageUrl(src, options);
         setImageSrc(optimized.fallback);
       } catch {
         setImageSrc(getImageUrl(src));

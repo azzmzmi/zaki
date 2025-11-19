@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Upload } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import DataTable from '@/components/DataTable';
 import OptimizedImage from '@/components/OptimizedImage';
+import { getSizeForContext } from '@/lib/imageUtils';
 import i18n from '@/i18n';
 
 export default function AdminCategories() {
@@ -22,12 +23,13 @@ export default function AdminCategories() {
   const [formData, setFormData] = useState({ name: '', description: '', name_ar: '', description_ar: '', image_url: '' });
   const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const ITEMS_PER_PAGE = 10;
 
   const { data: categoriesResponse, isLoading } = useQuery({
-    queryKey: ['admin-categories', currentPage],
+    queryKey: ['admin-categories', currentPage, searchQuery],
     queryFn: async () => {
-      const response = await categoriesApi.getAll(currentPage, ITEMS_PER_PAGE);
+      const response = await categoriesApi.getAll(currentPage, ITEMS_PER_PAGE, searchQuery || undefined);
       return response.data;
     }
   });
@@ -38,6 +40,11 @@ export default function AdminCategories() {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
   };
 
   const createMutation = useMutation({
@@ -149,9 +156,9 @@ export default function AdminCategories() {
       render: (value) => (
         <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0 flex items-center justify-center">
           {value ? (
-            <OptimizedImage src={value} alt="" width={48} height={48} quality={60} className="w-full h-full object-contain" />
+            <OptimizedImage src={value} alt="" size={getSizeForContext('thumbnail')} className="w-full h-full object-contain" />
           ) : (
-            <span className="text-xs text-gray-400">No image</span>
+            <span className="text-xs text-gray-400">{t('category.noImage')}</span>
           )}
         </div>
       )
@@ -209,6 +216,8 @@ export default function AdminCategories() {
           isLoading={isLoading}
           pagination={pagination}
           onPageChange={handlePageChange}
+          onSearch={handleSearch}
+          searchPlaceholder={t('common.searchCategories')}
           actions={actions}
           rowKey="id"
         />
@@ -260,7 +269,7 @@ export default function AdminCategories() {
                   {formData.image_url && (
                     <div className="mt-4">
                       <p className="text-sm font-medium mb-2">{t('category.imagePreview')}</p>
-                      <OptimizedImage src={formData.image_url} alt="Category preview" width={160} height={160} quality={70} className="max-h-40 max-w-full object-contain rounded border border-gray-200 dark:border-gray-700" />
+                      <OptimizedImage src={formData.image_url} alt="Category preview" size={getSizeForContext('thumbnail')} className="max-h-40 max-w-full object-contain rounded border border-gray-200 dark:border-gray-700" />
                     </div>
                   )}
                 </div>

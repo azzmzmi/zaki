@@ -35,7 +35,7 @@ export default function EditUserModal({ user, open, onOpenChange }) {
     },
     onSuccess: (updatedUser) => {
       queryClient.invalidateQueries(['admin-users']);
-      toast.success(t('auth.profileUpdateSuccess') || 'User updated successfully');
+      toast.success(t('user.updatedSuccessfully'));
       onOpenChange(false);
     },
     onError: (error) => {
@@ -49,7 +49,7 @@ export default function EditUserModal({ user, open, onOpenChange }) {
     e.preventDefault();
 
     if (newPassword && newPassword !== confirmPassword) {
-      toast.error(t('auth.passwordMismatch') || 'Passwords do not match');
+      toast.error(t('auth.passwordsDontMatch'));
       return;
     }
 

@@ -560,7 +560,7 @@ async def get_products(category_id: Optional[str] = None, search: Optional[str] 
             {"name": {"$regex": search, "$options": "i"}},
             {"description": {"$regex": search, "$options": "i"}}
         ]
-        english_results = await db.products.find(search_query, {"_id": 0, "id": 1}).to_list(1000)
+        english_results = await db.products.find(search_query, {"_id": 0, "id": 1}).limit(100).to_list(100)
         for prod in english_results:
             product_ids_from_search.add(prod["id"])
         
@@ -571,7 +571,7 @@ async def get_products(category_id: Optional[str] = None, search: Optional[str] 
                 {"ar": {"$regex": search, "$options": "i"}},
             ]
         }
-        arabic_results = await db.translations.find(translation_query, {"_id": 0, "key": 1}).to_list(1000)
+        arabic_results = await db.translations.find(translation_query, {"_id": 0, "key": 1}).limit(100).to_list(100)
         for trans in arabic_results:
             # Extract product ID from key like "entity.product.{id}.name"
             key_parts = trans["key"].split(".")
@@ -656,7 +656,7 @@ async def get_translations(lang: str, ref_id: Optional[str] = None):
         raise HTTPException(status_code=400, detail=ERROR_MESSAGES["UNSUPPORTED_LANGUAGE"])
     # Filter by ref_id if provided, otherwise get all translations
     query = {"ref_id": ref_id} if ref_id else {}
-    entries = await db.translations.find(query, {"_id": 0}).to_list(5000)
+    entries = await db.translations.find(query, {"_id": 0}).limit(1000).to_list(1000)
     result = {}
     for e in entries:
         val = e.get(lang) or e.get("en") or ""
@@ -972,6 +972,35 @@ async def startup():
     logger.info("Starting up application...")
     logger.info(f"Connecting to MongoDB at {mongo_url}")
     logger.info("Database connection successful")
+    
+    # Create database indexes for performance
+    try:
+        # Products collection indexes
+        await db.products.create_index("id")
+        await db.products.create_index("category_id")
+        await db.products.create_index([("name", "text"), ("description", "text")])
+        logger.info("✓ Products indexes created")
+        
+        # Categories collection indexes
+        await db.categories.create_index("id")
+        logger.info("✓ Categories indexes created")
+        
+        # Translations collection indexes
+        await db.translations.create_index("key")
+        await db.translations.create_index("ref_id")
+        await db.translations.create_index([("key", "text"), ("ar", "text"), ("en", "text")])
+        logger.info("✓ Translations indexes created")
+        
+        # Users collection indexes
+        await db.users.create_index("email", unique=True)
+        logger.info("✓ Users indexes created")
+        
+        # Orders collection indexes
+        await db.orders.create_index("user_id")
+        await db.orders.create_index("id")
+        logger.info("✓ Orders indexes created")
+    except Exception as e:
+        logger.warning(f"Index creation failed (may already exist): {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

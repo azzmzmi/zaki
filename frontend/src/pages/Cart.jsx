@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
-import { getImageUrl } from '@/lib/imageUtils';
+import { getImageUrl, getSizeForContext } from '@/lib/imageUtils';
+import OptimizedImage from '@/components/OptimizedImage';
 
 export default function Cart() {
   const { t } = useTranslation();
@@ -34,9 +35,10 @@ export default function Cart() {
 
                 {/* Image */}
                 <div className="w-full sm:w-20 h-40 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
-                  <img
-                    src={getImageUrl(item.image_url)}
+                  <OptimizedImage
+                    src={item.image_url}
                     alt={t(`entity.product.${item.id}.name`, { defaultValue: item.name })}
+                    size={getSizeForContext('cart')}
                     className="w-full h-full object-cover"
                   />
                 </div>

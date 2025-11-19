@@ -137,7 +137,7 @@ export default function AdminTheme() {
                 type="text"
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value)}
-                placeholder="#2563eb"
+                placeholder={t('theme.colorPlaceholder') || '#2563eb'}
                 className="flex-1"
               />
             </div>
@@ -159,7 +159,7 @@ export default function AdminTheme() {
                 type="text"
                 value={secondaryColor}
                 onChange={(e) => setSecondaryColor(e.target.value)}
-                placeholder="#4f46e5"
+                placeholder={t('theme.colorPlaceholder') || '#4f46e5'}
                 className="flex-1"
               />
             </div>
@@ -181,7 +181,7 @@ export default function AdminTheme() {
                 type="text"
                 value={accentColor}
                 onChange={(e) => setAccentColor(e.target.value)}
-                placeholder="#dc2626"
+                placeholder={t('theme.colorPlaceholder') || '#dc2626'}
                 className="flex-1"
               />
             </div>
@@ -255,13 +255,13 @@ export default function AdminTheme() {
                 setBorderRadius(currentTheme?.border_radius || 'md');
               }}
             >
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleSave}
               disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? t('common.saving') || 'Saving...' : t('common.save') || 'Save Changes'}
+              {updateMutation.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </div>
         </Card>

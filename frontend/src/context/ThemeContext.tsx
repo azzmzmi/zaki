@@ -31,8 +31,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const savedTheme = (localStorage.getItem('theme') as Theme) || 'system';
     setThemeState(savedTheme);
     
-    // Fetch custom theme settings from backend
-    fetchCustomTheme();
+    // Fetch custom theme settings from backend (with caching check)
+    const cachedTheme = localStorage.getItem('customTheme');
+    if (cachedTheme) {
+      try {
+        const theme = JSON.parse(cachedTheme);
+        setCustomTheme(theme);
+        applyCustomTheme(theme);
+      } catch (e) {
+        // Cache invalid, fetch fresh
+        fetchCustomTheme();
+      }
+    } else {
+      fetchCustomTheme();
+    }
     setIsLoaded(true);
   }, []);
 
@@ -43,6 +55,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (response.data) {
         setCustomTheme(response.data);
         applyCustomTheme(response.data);
+        // Cache the theme settings
+        localStorage.setItem('customTheme', JSON.stringify(response.data));
       }
     } catch (error) {
       // If theme fetch fails, use defaults

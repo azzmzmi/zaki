@@ -38,7 +38,7 @@ export default function ForgotPassword() {
   const resetPasswordMutation = useMutation({
     mutationFn: async () => {
       if (newPassword !== confirmPassword) {
-        throw new Error('Passwords do not match');
+        throw new Error(t('auth.passwordMismatch'));
       }
 
       const response = await axios.post(`${API_URL}/api/auth/reset-password`, {

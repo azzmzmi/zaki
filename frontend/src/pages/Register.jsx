@@ -27,7 +27,7 @@ export default function Register() {
       navigate('/');
     },
     onError: () => {
-      toast.error('Registration failed');
+      toast.error(t('auth.registerFailed'));
     }
   });
 
@@ -76,7 +76,7 @@ export default function Register() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={registerMutation.isPending} data-testid="register-submit-button">
-            {registerMutation.isPending ? 'Creating account...' : t('auth.register')}
+            {registerMutation.isPending ? t('auth.creatingAccount') : t('auth.register')}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
