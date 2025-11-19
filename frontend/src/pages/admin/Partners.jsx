@@ -15,7 +15,8 @@ import {
 import { Trash2, Upload, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
-import { getImageUrl } from '@/lib/imageUtils';
+import { getImageUrl, getSizeForContext } from '@/lib/imageUtils';
+import OptimizedImage from '@/components/OptimizedImage';
 
 export default function AdminPartners() {
   const { t } = useTranslation();
@@ -131,9 +132,10 @@ export default function AdminPartners() {
                 data-testid={`partner-card-${partner.id}`}
               >
                 <div className="flex-1 p-4 flex items-center justify-center bg-white dark:bg-gray-800 min-h-[200px]">
-                  <img
-                    src={getImageUrl(partner.logo_url)}
+                  <OptimizedImage
+                    src={partner.logo_url}
                     alt={partner.name}
+                    size={getSizeForContext('grid')}
                     className="max-h-40 max-w-40 object-contain"
                   />
                 </div>

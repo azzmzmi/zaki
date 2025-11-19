@@ -12,6 +12,7 @@ import { Search } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { toast } from 'sonner';
 import OptimizedImage from '@/components/OptimizedImage';
+import { getImageUrl, getSizeForContext } from '@/lib/imageUtils';
 
 export default function Products() {
   const { t } = useTranslation();
@@ -129,7 +130,7 @@ export default function Products() {
         <div className="text-center py-12" data-testid="loading-indicator">{t('common.loading')}</div>
       ) : products?.products && products.products.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="products-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="products-grid">
             {products.products.map((product) => (
             <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group" data-testid={`product-card-${product.id}`}>
               <Link to={`/products/${product.id}`}>
@@ -137,9 +138,7 @@ export default function Products() {
                   <OptimizedImage
                     src={product.image_url}
                     alt={t(`entity.product.${product.id}.name`, { defaultValue: product.name })}
-                    width={400}
-                    height={400}
-                    quality={75}
+                    size={getSizeForContext('grid')}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
@@ -225,7 +224,7 @@ export default function Products() {
           )}
         </>
       ) : (
-        <div className="text-center py-12 text-gray-500" data-testid="no-products">No products found</div>
+        <div className="text-center py-12 text-gray-500" data-testid="no-products">{t('products.noProductsFound')}</div>
       )}
     </div>
   );

@@ -29,7 +29,6 @@ export default function Profile() {
 
   const updateMutation = useMutation({
     mutationFn: async (data) => {
-      console.log('Updating profile with data:', data);
       const response = await axios.put(`${API_URL}/api/auth/profile`, data, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
@@ -37,13 +36,12 @@ export default function Profile() {
     },
     onSuccess: (updatedUser) => {
       setAuth(updatedUser, accessToken, useAuthStore.getState().refreshToken);
-      toast.success(t('auth.profileUpdateSuccess') || 'Profile updated successfully');
+      toast.success(t('user.updatedSuccessfully'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     },
     onError: (error) => {
-      console.error('Profile update error:', error);
       const errorMessage = error.response?.data?.detail || error.message || 'Failed to update profile';
       toast.error(errorMessage);
     }
@@ -53,7 +51,7 @@ export default function Profile() {
     e.preventDefault();
 
     if (newPassword && newPassword !== confirmPassword) {
-      toast.error(t('auth.passwordMismatch') || 'Passwords do not match');
+      toast.error(t('auth.passwordsDontMatch'));
       return;
     }
 
@@ -68,18 +66,18 @@ export default function Profile() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-2xl p-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">{t('profile.title') || 'My Profile'}</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">{t('profile.title')}</h1>
 
         <form onSubmit={handleUpdateProfile} className="space-y-6">
           {/* Account Info Section */}
           <div className="border-b pb-6">
-            <h2 className="text-xl font-semibold mb-4">{t('profile.accountInfo') || 'Account Information'}</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('profile.accountInfo')}</h2>
 
             
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="email">{t('profile.email') || 'Email'}</Label>
+                <Label htmlFor="email">{t('profile.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -101,7 +99,7 @@ export default function Profile() {
               </div>
 
               <div>
-                <Label htmlFor="role">{t('profile.role') || 'Role'}</Label>
+                <Label htmlFor="role">{t('profile.role')}</Label>
                 <Input
                   id="role"
                   type="text"
@@ -115,22 +113,22 @@ export default function Profile() {
 
           {/* Change Password Section */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">{t('profile.changePassword') || 'Change Password'}</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('profile.changePassword')}</h2>
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="newPassword">{t('profile.newPassword') || 'New Password'}</Label>
+                <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
                 <Input
                   id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t('profile.leaveBlankNoChange') || 'Leave blank if no change'}
+                  placeholder={t('profile.leaveBlankNoChange')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword">{t('profile.confirmPassword') || 'Confirm Password'}</Label>
+                <Label htmlFor="confirmPassword">{t('profile.confirmPassword')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -149,13 +147,13 @@ export default function Profile() {
               variant="outline"
               onClick={() => navigate('/')}
             >
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? t('common.saving') || 'Saving...' : t('common.save') || 'Save Changes'}
+              {updateMutation.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </div>
         </form>

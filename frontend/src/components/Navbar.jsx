@@ -72,9 +72,7 @@ export default function Navbar() {
             </Link>
 
             {/* Theme toggle */}
-            <Button variant="ghost" size="icon">
-              <ThemeSwitcher />
-            </Button>
+            <ThemeSwitcher />
 
             {/* Language */}
             <DropdownMenu>

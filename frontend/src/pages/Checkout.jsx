@@ -60,7 +60,7 @@ export default function Checkout() {
       navigate('/');
     },
     onError: () => {
-      toast.error('Failed to create order');
+      toast.error(t('checkout.orderFailed'));
     }
   });
 
@@ -77,7 +77,7 @@ export default function Checkout() {
     if (!shippingAddress.full_name || !shippingAddress.street_address || 
         !shippingAddress.city || !shippingAddress.state || 
         !shippingAddress.zip_code || !shippingAddress.phone) {
-      toast.error('Please fill in all address fields');
+      toast.error(t('checkout.fillAllFields'));
       return;
     }
     
@@ -112,7 +112,7 @@ export default function Checkout() {
                     type="text"
                     value={shippingAddress.street_address}
                     onChange={(e) => handleAddressChange('street_address', e.target.value)}
-                    placeholder="123 Main Street"
+                    placeholder={t('checkout.streetAddressPlaceholder')}
                     required
                   />
                 </div>
@@ -125,7 +125,7 @@ export default function Checkout() {
                       type="text"
                       value={shippingAddress.city}
                       onChange={(e) => handleAddressChange('city', e.target.value)}
-                      placeholder="New York"
+                      placeholder={t('checkout.cityPlaceholder')}
                       required
                     />
                   </div>
@@ -153,7 +153,7 @@ export default function Checkout() {
                       type="text"
                       value={shippingAddress.zip_code}
                       onChange={(e) => handleAddressChange('zip_code', e.target.value)}
-                      placeholder="10001"
+                      placeholder={t('checkout.zipCodePlaceholder')}
                       required
                     />
                   </div>
@@ -165,7 +165,7 @@ export default function Checkout() {
                       type="tel"
                       value={shippingAddress.phone}
                       onChange={(e) => handleAddressChange('phone', e.target.value)}
-                      placeholder="(555) 123-4567"
+                      placeholder={t('checkout.phonePlaceholder')}
                       required
                     />
                   </div>

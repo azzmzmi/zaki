@@ -19,11 +19,14 @@ const resources = {
       'common.delete': 'Delete',
       'common.edit': 'Edit',
       'common.search': 'Search',
+      'common.searchProducts': 'Search products...',
+      'common.searchCategories': 'Search categories...',
       'common.filter': 'Filter',
       'common.sending': 'Sending...',
       'common.resetting': 'Resetting...',
       'common.saving': 'Saving...',
       'common.actions': 'Actions',
+      'common.noDataFound': 'No data found',
       
       // Navigation
       'nav.home': 'Home',
@@ -50,6 +53,7 @@ const resources = {
       'auth.loginSuccess': 'Logged in successfully',
       'auth.registerSuccess': 'Registered successfully',
       'auth.registerError': 'Email already registered',
+      'auth.registerFailed': 'Registration failed',
       'auth.forgotPassword': 'Forgot Password',
       'auth.resetPassword': 'Reset Password',
       'auth.resetPasswordSuccess': 'Password reset successfully',
@@ -67,8 +71,9 @@ const resources = {
       'auth.enterYourEmail': 'Enter your email',
       'auth.resetLinkSent': 'Password reset link has been sent to your email. Please check your email for the token.',
       'auth.profileUpdateSuccess': 'Profile updated successfully',
-      'auth.dontHaveAccount': "Don't have an account?",
-      'auth.haveAccount': 'Already have an account?',
+      'auth.loggingIn': 'Logging in...',
+      'auth.creatingAccount': 'Creating account...',
+      'auth.passwordsDontMatch': 'Passwords do not match',
       
       
       // Products
@@ -88,6 +93,11 @@ const resources = {
       'products.sortNewest': 'Newest',
       'products.sortPopular': 'Most Popular',
       'products.sortStock': 'Stock Available',
+      'products.notFound': 'Product not found',
+      'products.addedToCart': 'added to cart',
+      'products.noImage': 'No image',
+      'products.back': 'Back',
+      'products.noProductsFound': 'No products found',
       
       // Cart
       'cart.title': 'Shopping Cart',
@@ -108,15 +118,14 @@ const resources = {
       'checkout.orderSummary': 'Order Summary',
       'checkout.placeOrder': 'Place Order',
       'checkout.orderSuccess': 'Order placed successfully!',
+      'checkout.fillAllFields': 'Please fill in all address fields',
+      'checkout.orderFailed': 'Failed to create order',
       
       // Checkout Address Fields
       'checkout.streetAddress': 'Street Address',
       'checkout.city': 'City',
       'checkout.state': 'State',
       'checkout.zipCode': 'ZIP Code',
-      'checkout.phone': 'Phone',
-      
-      // Admin
       'admin.dashboard': 'Dashboard',
       'admin.products': 'Products',
       'admin.categories': 'Categories',
@@ -127,7 +136,10 @@ const resources = {
       'partners.manageTitle': 'Manage Partners',
       'admin.analytics': 'Analytics',
       'admin.addProduct': 'Add Product',
+      'admin.manageYourProducts': 'Manage all your products',
       'admin.addCategory': 'Add Category',
+      'admin.manageYourCategories': 'Manage all your categories',
+      'admin.manageYourUsers': 'Manage all your users',
       'admin.totalSales': 'Total Sales',
       'admin.totalOrders': 'Total Orders',
       'admin.totalUsers': 'Total Users',
@@ -152,6 +164,7 @@ const resources = {
       'theme.primaryColor': 'Primary Color',
       'theme.secondaryColor': 'Secondary Color',
       'theme.accentColor': 'Accent Color',
+      'theme.colorPlaceholder': 'Color code (e.g., #2563eb)',
       'theme.fontSize': 'Font Size',
       'theme.fontSizeSmall': 'Small',
       'theme.fontSizeBase': 'Base',
@@ -225,8 +238,10 @@ const resources = {
       'product.deleteFailed': 'Failed to delete product',
       'product.imageUploaded': 'Image uploaded',
       'product.uploadImageFailed': 'Failed to upload image',
-      'product.editTitle': 'Edit Product',
+      'product.noImage': 'No image',
+      'product.back': 'Back',
       'product.required': '*',
+      'product.editTitle': 'Edit Product',
       
       // Category Admin Form
       'category.name': 'Name',
@@ -241,6 +256,7 @@ const resources = {
       'category.deleteFailed': 'Failed to delete category',
       'category.editTitle': 'Edit Category',
       'category.required': '*',
+      'category.noImage': 'No image',
       'category.image': 'Category Image',
       'category.imageUploading': 'Uploading...',
       'category.uploadImageButton': 'Upload Image',
@@ -251,16 +267,12 @@ const resources = {
       // Partner Admin Form
       'partner.deleteButton': 'Delete',
       'partner.selectedFile': 'Selected:',
-      'checkout.fillAllFields': 'Please fill in all address fields',
-      'checkout.orderFailed': 'Failed to create order',
       'checkout.processing': 'Processing...',
       'checkout.streetAddressPlaceholder': '123 Main Street',
       'checkout.cityPlaceholder': 'New York',
       'checkout.zipCodePlaceholder': '10001',
       'checkout.phonePlaceholder': '(555) 123-4567',
       'checkout.selectState': 'Select State',
-      'auth.loggingIn': 'Logging in...',
-      'auth.creatingAccount': 'Creating account...',
       
       // Profile Form
       'profile.accountInfo': 'Account Information',
@@ -285,6 +297,8 @@ const resources = {
       'user.fullName': 'Full Name',
       'user.role': 'Role',
       'user.updateFailed': 'Failed to update user',
+      'user.updatedSuccessfully': 'User updated successfully',
+      'user.joined': 'Joined',
       
       'home.freeShippingDesc': 'Free delivery on orders over $50',
       'home.qualityProducts': 'Quality Products',
@@ -315,6 +329,8 @@ const resources = {
       'pagination.next': 'Next',
       'pagination.page': 'Page',
       'pagination.of': 'of',
+      'pagination.item': 'item',
+      'pagination.items': 'items',
       
       // Footer
       'footer.description': 'Your trusted online shopping destination for quality products and excellent service.',
@@ -454,11 +470,13 @@ const resources = {
       'common.delete': 'حذف',
       'common.edit': 'تعديل',
       'common.search': 'بحث',
+      'common.searchProducts': 'ابحث عن منتجات...',
+      'common.searchCategories': 'ابحث عن فئات...',
       'common.filter': 'تصفية',
       'common.sending': 'جاري الإرسال...',
       'common.resetting': 'جاري التغيير...',
       'common.saving': 'جاري الحفظ...',
-      'common.actions': 'الإجراءات',
+      'common.noDataFound': 'لا توجد بيانات',
       
       'nav.home': 'الرئيسية',
       'nav.products': 'المنتجات',
@@ -485,6 +503,7 @@ const resources = {
       'auth.registerSuccess': 'تم التسجيل بنجاح',
       'auth.loginError': 'بيانات اعتماد غير صالحة',
       'auth.registerError': 'البريد الإلكتروني مسجل مسبقا',
+      'auth.registerFailed': 'فشل التسجيل',
       'auth.forgotPassword': 'هل نسيت كلمة المرور',
       'auth.resetPassword': 'تغيير كلمة المرور',
       'auth.resetPasswordSuccess': 'تم تغيير كلمة المرور بنجاح',
@@ -520,6 +539,11 @@ const resources = {
       'products.sortNewest': 'الأحدث',
       'products.sortPopular': 'الأكثر شهرة',
       'products.sortStock': 'المتاح',
+      'products.notFound': 'لم يتم العثور على المنتج',
+      'products.addedToCart': 'تمت الإضافة إلى السلة',
+      'products.noImage': 'لا توجد صورة',
+      'products.back': 'العودة',
+      'products.noProductsFound': 'لم يتم العثور على منتجات',
       
       // Cart
       'cart.title': 'سلة التسوق',
@@ -540,6 +564,8 @@ const resources = {
       'checkout.orderSummary': 'ملخص الطلب',
       'checkout.placeOrder': 'تقديم الطلب',
       'checkout.orderSuccess': 'تم تقديم الطلب بنجاح!',
+      'checkout.fillAllFields': 'يرجى ملء جميع حقول العنوان',
+      'checkout.orderFailed': 'فشل إنشاء الطلب',
       
       // Checkout Address Fields
       'checkout.streetAddress': 'عنوان الشارع',
@@ -559,7 +585,10 @@ const resources = {
       'partners.manageTitle': 'إدارة الشركاء',
       'admin.analytics': 'التحليلات',
       'admin.addProduct': 'إضافة منتج',
+      'admin.manageYourProducts': 'إدارة جميع منتجاتك',
       'admin.addCategory': 'إضافة فئة',
+      'admin.manageYourCategories': 'إدارة جميع فئاتك',
+      'admin.manageYourUsers': 'إدارة جميع مستخدميك',
       'admin.totalSales': 'إجمالي المبيعات',
       'admin.totalOrders': 'إجمالي الطلبات',
       'admin.totalUsers': 'إجمالي المستخدمين',
@@ -584,6 +613,7 @@ const resources = {
       'theme.primaryColor': 'اللون الأساسي',
       'theme.secondaryColor': 'اللون الثانوي',
       'theme.accentColor': 'لون التمييز',
+      'theme.colorPlaceholder': 'رمز اللون (مثال: #2563eb)',
       'theme.fontSize': 'حجم الخط',
       'theme.fontSizeSmall': 'صغير',
       'theme.fontSizeBase': 'عادي',
@@ -657,8 +687,10 @@ const resources = {
       'product.deleteFailed': 'فشل حذف المنتج',
       'product.imageUploaded': 'تم رفع الصورة',
       'product.uploadImageFailed': 'فشل رفع الصورة',
-      'product.editTitle': 'تعديل المنتج',
+      'product.noImage': 'لا توجد صورة',
+      'product.back': 'العودة',
       'product.required': '*',
+      'product.editTitle': 'تعديل المنتج',
       
       // Category Admin Form
       'category.name': 'الاسم',
@@ -673,6 +705,7 @@ const resources = {
       'category.deleteFailed': 'فشل حذف الفئة',
       'category.editTitle': 'تعديل الفئة',
       'category.required': '*',
+      'category.noImage': 'لا توجد صورة',
       'category.image': 'صورة الفئة',
       'category.imageUploading': 'جاري التحميل...',
       'category.uploadImageButton': 'رفع صورة',
@@ -683,17 +716,11 @@ const resources = {
       // Partner Admin Form
       'partner.deleteButton': 'حذف',
       'partner.selectedFile': 'المحدد:',
-      'checkout.orderFailed': 'فشل إنشاء الطلب',
       'checkout.processing': 'جاري معالجة...',
       'checkout.streetAddressPlaceholder': '123 شارع رئيسي',
       'checkout.cityPlaceholder': 'نيويورك',
       'checkout.zipCodePlaceholder': '10001',
       'checkout.phonePlaceholder': '(555) 123-4567',
-      'checkout.selectState': 'اختر الولاية',
-      
-      // Authentication Status Messages
-      'auth.loggingIn': 'جاري تسجيل الدخول...',
-      'auth.creatingAccount': 'جاري إنشاء الحساب...',
       
       // Form Validation
       'form.required': '*',
@@ -703,8 +730,12 @@ const resources = {
       'user.email': 'البريد الإلكتروني (قراءة فقط)',
       'user.fullName': 'الاسم الكامل',
       'user.role': 'الدور',
-      'user.updated': 'تم التحديث بنجاح',
       'user.updateFailed': 'فشل التحديث',
+      'user.updatedSuccessfully': 'تم تحديث المستخدم بنجاح',
+      'user.joined': 'الانضمام',
+      'auth.loggingIn': 'جاري تسجيل الدخول...',
+      'auth.creatingAccount': 'جاري إنشاء الحساب...',
+      'auth.passwordsDontMatch': 'كلمات المرور غير متطابقة',
       'home.freeShippingDesc': 'توصيل مجاني للطلبات التي تزيد عن 50 دولار',
       'home.qualityProducts': 'منتجات عالية الجودة',
       'home.qualityProductsDesc': 'منتجات مختارة بعناية من أعلى جودة',
@@ -735,6 +766,8 @@ const resources = {
       'pagination.next': 'التالي',
       'pagination.page': 'الصفحة',
       'pagination.of': 'من',
+      'pagination.item': 'عنصر',
+      'pagination.items': 'عناصر',
       
       // Footer
       'footer.description': 'موقع تسوق إلكتروني موثوق به لمنتجات عالية الجودة وخدمة ممتازة.',
@@ -753,7 +786,7 @@ const resources = {
       'footer.home': 'الرئيسية',
       'footer.products': 'المنتجات',
       'footer.cart': 'السلة',
-      'footer.login': 'تسجيل الدخول', 
+      'footer.login': 'تسجيل الدخول'
     }
   }
 };
@@ -773,17 +806,26 @@ i18n
     }
   });
 
-// Load dynamic translations from backend (only once)
+// Load dynamic translations from backend asynchronously (non-blocking)
 let translationsLoaded = false;
 
+// Start loading translations in the background without blocking
 if (!translationsLoaded) {
   translationsLoaded = true;
-  translationsApi.getByLang('en').then(res => {
-    i18n.addResourceBundle('en', 'translation', res.data, true, true);
-  }).catch(() => {});
-  translationsApi.getByLang('ar').then(res => {
-    i18n.addResourceBundle('ar', 'translation', res.data, true, true);
-  }).catch(() => {});
+  // Load translations asynchronously without waiting
+  setTimeout(() => {
+    translationsApi.getByLang('en')
+      .then(res => {
+        i18n.addResourceBundle('en', 'translation', res.data, true, true);
+      })
+      .catch(err => console.warn('Failed to load EN translations:', err));
+    
+    translationsApi.getByLang('ar')
+      .then(res => {
+        i18n.addResourceBundle('ar', 'translation', res.data, true, true);
+      })
+      .catch(err => console.warn('Failed to load AR translations:', err));
+  }, 100);
 }
 
 export default i18n;

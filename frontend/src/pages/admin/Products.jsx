@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import OptimizedImage from '@/components/OptimizedImage';
+import { getSizeForContext } from '@/lib/imageUtils';
 import DataTable from '@/components/DataTable';
 import i18n from '@/i18n';
 
@@ -23,12 +24,13 @@ export default function AdminProducts() {
   const [formData, setFormData] = useState({ name: '', description: '', price: '', category_id: '', stock: '', image_url: '', name_ar: '', description_ar: '' });
   const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
   const ITEMS_PER_PAGE = 10;
 
   const { data: productsResponse, isLoading } = useQuery({
-    queryKey: ['admin-products', currentPage],
+    queryKey: ['admin-products', currentPage, searchQuery],
     queryFn: async () => {
-      const response = await productsApi.getAll(undefined, undefined, currentPage, ITEMS_PER_PAGE);
+      const response = await productsApi.getAll(undefined, searchQuery || undefined, currentPage, ITEMS_PER_PAGE);
       return response.data;
     }
   });
@@ -39,6 +41,11 @@ export default function AdminProducts() {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
   };
 
   const { data: categories } = useQuery({
@@ -176,10 +183,10 @@ export default function AdminProducts() {
       render: (value) => (
         value ? (
           <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden flex-shrink-0">
-            <OptimizedImage src={value} alt="" width={48} height={48} quality={60} className="w-full h-full object-cover" />
+            <OptimizedImage src={value} alt="" size={getSizeForContext('thumbnail')} className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center text-xs text-gray-400">No image</div>
+          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center text-xs text-gray-400">{t('product.noImage')}</div>
         )
       )
     },
@@ -241,6 +248,8 @@ export default function AdminProducts() {
           isLoading={isLoading}
           pagination={pagination}
           onPageChange={handlePageChange}
+          onSearch={handleSearch}
+          searchPlaceholder={t('common.searchProducts')}
           actions={actions}
           rowKey="id"
         />
@@ -294,7 +303,7 @@ export default function AdminProducts() {
                   <Input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} data-testid="product-image-input" />
                   {uploading && <span className="text-sm">{t('product.uploading')}</span>}
                 </div>
-                {formData.image_url && <OptimizedImage src={formData.image_url} alt="Preview" width={96} height={96} quality={75} className="mt-2 w-24 h-24 object-cover rounded" />}
+                {formData.image_url && <OptimizedImage src={formData.image_url} alt="Preview" size={getSizeForContext('thumbnail')} className="mt-2 w-24 h-24 object-cover rounded" />}
               </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={handleCloseDialog} data-testid="cancel-product-button">{t('common.cancel')}</Button>

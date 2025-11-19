@@ -47,10 +47,31 @@ export const getImageUrl = (imageUrl) => {
  * @param {number} options.width - Desired width in pixels
  * @param {number} options.height - Desired height in pixels
  * @param {number} options.quality - Quality 1-100 (default: 80)
+ * @param {string} options.size - Preset size: 'thumbnail', 'small', 'medium', 'large', 'full'
  * @returns {object} Object with webp and fallback URLs
  */
 export const getOptimizedImageUrl = (imageUrl, options = {}) => {
-  const { width, height, quality = 80 } = options;
+  const { quality, size = 'medium' } = options;
+  let { width, height } = options;
+  
+  // Apply preset sizes if provided
+  const sizePresets = {
+    thumbnail: { width: 80, height: 80, quality: 70 },
+    small: { width: 200, height: 200, quality: 75 },
+    medium: { width: 400, height: 400, quality: 80 },
+    large: { width: 600, height: 600, quality: 85 },
+    full: { width: 1200, height: 800, quality: 90 }
+  };
+  
+  if (sizePresets[size]) {
+    const preset = sizePresets[size];
+    if (!width) width = preset.width;
+    if (!height) height = preset.height;
+    if (quality === undefined) {
+      // Use preset quality but continue to build the full object
+    }
+  }
+  
   const baseUrl = getImageUrl(imageUrl);
   
   // For external URLs (Unsplash, etc.), leverage their optimization
@@ -63,15 +84,16 @@ export const getOptimizedImageUrl = (imageUrl, options = {}) => {
   }
   
   // For local/backend URLs, add compression parameters if supported by backend
+  const finalQuality = quality !== undefined ? quality : (sizePresets[size]?.quality || 80);
   const params = [];
-  if (quality) params.push(`q=${quality}`);
+  if (finalQuality) params.push(`q=${finalQuality}`);
   if (width) params.push(`w=${width}`);
   if (height) params.push(`h=${height}`);
   
   const queryString = params.length ? `?${params.join('&')}` : '';
   const webpUrl = baseUrl.includes('?') 
-    ? `${baseUrl}&fmt=webp&q=${quality}`
-    : `${baseUrl}?fmt=webp&q=${quality}`;
+    ? `${baseUrl}&fmt=webp&q=${finalQuality}`
+    : `${baseUrl}?fmt=webp&q=${finalQuality}`;
   
   return {
     webp: webpUrl,
@@ -81,9 +103,23 @@ export const getOptimizedImageUrl = (imageUrl, options = {}) => {
 };
 
 /**
- * Check if browser supports WebP format
- * @returns {boolean}
+ * Helper function to get size-appropriate quality based on context
+ * Products grid uses smaller, lower quality images
+ * Product detail page uses full resolution
+ * @param {string} context - 'grid' | 'card' | 'detail' | 'thumbnail'
+ * @returns {string} Size preset name
  */
+export const getSizeForContext = (context = 'card') => {
+  const contextMap = {
+    thumbnail: 'thumbnail',  // Admin tables, small previews (80x80, q:70)
+    grid: 'small',            // Product grid display (200x200, q:75)
+    card: 'small',            // Category cards (200x200, q:75)
+    detail: 'full',           // Product detail page (1200x800, q:90)
+    cart: 'small',            // Cart items (200x200, q:75)
+    home: 'medium'            // Home page featured (400x400, q:80)
+  };
+  return contextMap[context] || 'medium';
+};
 export const supportsWebP = () => {
   if (typeof window === 'undefined') return false;
   

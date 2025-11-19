@@ -44,7 +44,7 @@ export function DataTable({
         {isLoading ? (
           <div className="p-8 text-center text-gray-500">{t('common.loading')}</div>
         ) : data.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No data found</div>
+          <div className="p-8 text-center text-gray-500">{t('common.noDataFound')}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -94,7 +94,7 @@ export function DataTable({
         <div className="flex items-center justify-between pt-4">
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {t('pagination.page')} {pagination.page} {t('pagination.of')} {pagination.pages} • {pagination.total}{' '}
-            {pagination.total === 1 ? 'item' : 'items'}
+            {pagination.total === 1 ? t('pagination.item') : t('pagination.items')}
           </div>
 
           <div className="flex items-center gap-2">

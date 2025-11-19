@@ -7,8 +7,8 @@ import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import { productsApi } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
 import { toast } from 'sonner';
-import { getImageUrl } from '@/lib/imageUtils';
-
+import { getImageUrl, getSizeForContext } from '@/lib/imageUtils';
+import OptimizedImage from '@/components/OptimizedImage';
 export default function ProductDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export default function ProductDetail() {
         image_url: product.image_url
         
       });
-      toast.success(`${t(`entity.product.${product.id}.name`, { defaultValue: product.name })} added to cart`);
+      toast.success(`${t(`entity.product.${product.id}.name`, { defaultValue: product.name })} ${t('products.addedToCart')}`);
     }
   };
 
@@ -42,22 +42,23 @@ export default function ProductDetail() {
   }
 
   if (!product) {
-    return <div className="max-w-7xl mx-auto px-4 py-8 text-center" data-testid="product-not-found">Product not found</div>;
+    return <div className="max-w-7xl mx-auto px-4 py-8 text-center" data-testid="product-not-found">{t('products.notFound')}</div>
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8" data-testid="product-detail-page">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6" data-testid="back-button">
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back
+        {t('products.back')}
       </Button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         <Card className="overflow-hidden h-fit">
           <div className="aspect-square bg-gray-100 dark:bg-gray-800">
-            <img
-              src={getImageUrl(product.image_url)}
+            <OptimizedImage
+              src={product.image_url}
               alt={t(`entity.product.${product.id}.name`, { defaultValue: product.name })}
+              size={getSizeForContext('detail')}
               className="w-full h-full object-cover"
               data-testid="product-image"
             />
