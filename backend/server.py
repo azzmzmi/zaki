@@ -544,7 +544,7 @@ async def delete_category(category_id: str, admin: User = Depends(require_admin)
 async def get_products(category_id: Optional[str] = None, search: Optional[str] = None, page: int = 1, limit: int = 12):
     # Validate pagination parameters
     page = max(1, page)
-    limit = min(limit, 100)  # Max 100 per page
+    limit = min(limit, 500)  # Max 100 per page
     skip = (page - 1) * limit
     query = {}
     if category_id:

@@ -169,7 +169,7 @@ export default function Products() {
             <div className="flex items-center justify-between pt-12">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {t('pagination.page')} {products.pagination.page} {t('pagination.of')} {products.pagination.pages} • {products.pagination.total}{' '}
-                {products.pagination.total === 1 ? 'item' : 'items'}
+                {products.pagination.total === 1 ? t('pagination.item') : t('pagination.items')}
               </div>
 
               <div className="flex items-center gap-2">
