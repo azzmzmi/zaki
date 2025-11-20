@@ -34,19 +34,19 @@ async def seed_database():
     
     # Create admin user
     print("\n1. Creating admin user...")
-    admin_exists = await db.users.find_one({"email": "info@sandvalley.com"})
+    admin_exists = await db.users.find_one({"email": "info@zakimart.com"})
     
     if not admin_exists:
         admin_user = {
             "id": "admin-001",
-            "email": "info@sandvalley.com",
+            "email": "info@zakimart.com",
             "full_name": "Admin User",
             "role": "admin",
-            "password": pwd_context.hash("admin@SV"),
+            "password": pwd_context.hash("admin@ZM"),
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(admin_user)
-        print("   ✓ Admin user created (info@sandvalley.com / admin123)")
+        print("   ✓ Admin user created (info@zakimart.com / admin123)")
     else:
         print("   ✓ Admin user already exists")
     
@@ -184,7 +184,7 @@ async def seed_database():
     
     print("\n✅ Database seeded successfully!")
     print(f"\nAdmin credentials:")
-    print(f"   Email: info@sandvalley.com")
+    print(f"   Email: info@zakimart.com")
     print(f"   Password: admin123")
     
     # Close connection

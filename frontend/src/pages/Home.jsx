@@ -21,6 +21,7 @@ export default function Home() {
       const response = await productsApi.getAll(undefined, undefined, 1, 500);
       // Handle both old array format and new paginated format
       const products = response.data?.data || response.data || [];
+      // console.log('Fetched products:', products);
       return products.sort((a, b) => b.stock - a.stock);
     }
   });
@@ -138,7 +139,7 @@ export default function Home() {
 
       {/* Featured Products */}
       {products && products.length > 0 && (
-        <section className="py-16 px-4">
+        <section className="py-16 px-4" id="featured-products">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-12 text-center" data-testid="featured-products-title">
               {t('home.mostPopular')}
@@ -161,10 +162,20 @@ export default function Home() {
                       />
                     </div>
                     <div className="p-4">
+                      <div className="flex items-center justify-between">
                       <h3 className="font-semibold mb-2 line-clamp-1">
                         {t(`entity.product.${product.id}.name`, { defaultValue: product.name })}
                       </h3>
                       <p className="text-xl font-bold text-blue-600">${product.price}</p>
+                      </div>
+                      <Button
+                        className="w-full"
+                        onClick={() => handleAddToCart(product)}
+                        disabled={product.stock === 0}
+                        data-testid={`add-to-cart-${product.id}`}
+                      >
+                        {product.stock > 0 ? t('products.addToCart') : t('products.outOfStock')}
+                      </Button>
                     </div>
                   </Card>
                 </Link>
@@ -211,7 +222,7 @@ export default function Home() {
                           size="sm"
                           onClick={() => {
                             setCurrentPage(pageNum);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.scrollTo({ top: document.getElementById('featured-products').offsetTop, behavior: 'smooth' });
                           }}
                           className="w-10"
                           data-testid={`featured-page-${pageNum}`}

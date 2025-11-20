@@ -80,7 +80,7 @@ export default function Login() {
         </p>
 {/*         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
           <p className="text-sm font-semibold mb-2">Demo Credentials:</p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">Admin: info@sandvalley.com / admin123</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Admin: info@zakimart.com / admin123</p>
         </div> */}
       </Card>
     </div>
