@@ -1,16 +1,16 @@
 /**
- * Centralized contact information for Sand Valley, LLC
+ * Centralized contact information for Zaki Mart
  * Used across the project for consistent contact details
  */
 
 export const CONTACT_INFO = {
   // Company name
-  company_name: 'Sand Valley, LLC',
+  company_name: 'Zaki Mart',
   
   // Contact details
-  phone: '+1 (313)-258-4233',
-  email: 'info@sandvalleyllc.com',
-  address: '8747 Brandt St, Dearborn, MI 48126, United States',
+  phone: '347-503-8101',
+  email: 'info@zakimart.com',
+  address: '2868 NC HWY 39S, HENDERSON , NC 27537',
   
   // Social media
   social: {

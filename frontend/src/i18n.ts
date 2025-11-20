@@ -7,7 +7,7 @@ const resources = {
   en: {
     translation: {
       // Common
-      'app.name': 'SandValley',
+      'app.name': 'Zaki Mart',
       'app.tagline': 'The First Yemeni Products Store in USA',
       'common.welcome': 'High-quality wholesale products, reliable service, and exceptional value every time.',
       'common.loading': 'Loading...',
@@ -356,7 +356,7 @@ const resources = {
  /*  es: {
     translation: {
       // Common
-      'app.name': 'SandValley',
+      'app.name': 'Zaki Mart',
       'app.tagline': 'Tu Tienda Todo en Uno',
       'common.loading': 'Cargando...',
       'common.error': 'Error',
@@ -458,7 +458,7 @@ const resources = {
   ar: {
     translation: {
       // Common
-      'app.name': 'ساندفالي',
+      'app.name': 'زاكي مارت',
       'app.tagline': 'متجر المنتجات اليمنية في الولايات المتحدة الأمريكية', 
       'common.welcome': 'توفير منتجات عالية الجودة . و خدمة موثوقة متميزه لعملائنا الكرام.',
       'common.loading': 'جاري التحميل...',
@@ -773,7 +773,7 @@ const resources = {
       'footer.description': 'موقع تسوق إلكتروني موثوق به لمنتجات عالية الجودة وخدمة ممتازة.',
       'footer.quickLinks': 'الروابط السريعة',
       'footer.customerService': 'خدمة العملاء',
-      'footer.aboutUs': 'عن ساند فالي',
+      'footer.aboutUs': 'عن زاكي مارت',
       'footer.contactUs': 'اتصل بنا',
       'footer.privacyPolicy': 'سياسة الخصوصية',
       'footer.termsConditions': 'الشروط والأحكام',

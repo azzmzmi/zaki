@@ -21,7 +21,7 @@ export default function Home() {
       const response = await productsApi.getAll(undefined, undefined, 1, 500);
       // Handle both old array format and new paginated format
       const products = response.data?.data || response.data || [];
-      console.log('Fetched products:', products);
+      // console.log('Fetched products:', products);
       return products.sort((a, b) => b.stock - a.stock);
     }
   });
