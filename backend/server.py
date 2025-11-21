@@ -233,7 +233,7 @@ async def upload_file_to_godaddy_ftp(file_name: str, content: bytes) -> str:
 
     def _upload():
         logger.info(f"📤 [FTP] Creating FTP connection...")
-        with ftplib.FTP(timeout=10) as ftp:
+        with ftplib.FTP(timeout=2) as ftp:
             logger.info(f"📤 [FTP] Connecting to {GODADDY_FTP_HOST}:{GODADDY_FTP_PORT}")
             ftp.connect(GODADDY_FTP_HOST, GODADDY_FTP_PORT)
             logger.info(f"✅ [FTP] Connected successfully")
