@@ -39,36 +39,52 @@ def test_ftp_connection():
     """Test basic FTP connection"""
     print("[1/4] Testing FTP Connection...")
     try:
-        with ftplib.FTP(FTP_HOST) as ftp:
+        with ftplib.FTP(FTP_HOST, timeout=10) as ftp:
             response = ftp.login(FTP_USER, FTP_PASSWORD)
             print(f"✓ Connected to {FTP_HOST}")
             print(f"  Login response: {response}")
-            return ftp
+            return True
     except ftplib.all_errors as e:
         print(f"✗ Failed to connect: {e}")
         return None
 
-def test_directory_access(ftp):
+def test_directory_access():
     """Test if FTP directory is accessible"""
     print("\n[2/4] Testing Directory Access...")
     try:
-        if FTP_DIR:
-            ftp.cwd(FTP_DIR)
-            print(f"✓ Successfully changed to directory: {FTP_DIR}")
-        else:
-            print("⚠ No FTP directory specified, using root")
-        
-        # List directory contents
-        print("\nDirectory contents (first 10 files):")
-        files = ftp.nlst()[:10]
-        for f in files:
-            print(f"  - {f}")
-        return True
+        with ftplib.FTP(FTP_HOST, timeout=10) as ftp:
+            ftp.login(FTP_USER, FTP_PASSWORD)
+            
+            # First, list root directory
+            print("Root directory contents (first 15 items):")
+            try:
+                files = ftp.nlst()[:15]
+                for f in files:
+                    print(f"  - {f}")
+            except Exception as e:
+                print(f"  (Could not list: {e})")
+            
+            if FTP_DIR:
+                try:
+                    ftp.cwd(FTP_DIR)
+                    print(f"\n✓ Successfully changed to directory: {FTP_DIR}")
+                    
+                    # List directory contents
+                    print("\nDirectory contents (first 10 files):")
+                    files = ftp.nlst()[:10]
+                    for f in files:
+                        print(f"  - {f}")
+                except ftplib.all_errors as e:
+                    print(f"\n⚠ Could not access '{FTP_DIR}': {e}")
+                    print("   (Directory may not exist - will try to create on upload)")
+            else:
+                print("\n⚠ No FTP directory specified, using root")
+            return True
     except ftplib.all_errors as e:
         print(f"✗ Directory access failed: {e}")
         return False
 
-def test_file_upload(ftp):
+def test_file_upload():
     """Test uploading a test file"""
     print("\n[3/4] Testing File Upload...")
     test_content = b"GoDaddy FTP Test File - This file was uploaded successfully!"
@@ -76,9 +92,19 @@ def test_file_upload(ftp):
     
     try:
         import io
-        ftp.storbinary(f"STOR {test_filename}", io.BytesIO(test_content))
-        print(f"✓ Successfully uploaded test file: {test_filename}")
-        return test_filename
+        with ftplib.FTP(FTP_HOST, timeout=10) as ftp:
+            ftp.login(FTP_USER, FTP_PASSWORD)
+            
+            # Try to change directory if specified
+            if FTP_DIR:
+                try:
+                    ftp.cwd(FTP_DIR)
+                except ftplib.all_errors:
+                    pass  # Directory might not exist, we'll upload to root
+            
+            ftp.storbinary(f"STOR {test_filename}", io.BytesIO(test_content))
+            print(f"✓ Successfully uploaded test file: {test_filename}")
+            return test_filename
     except ftplib.all_errors as e:
         print(f"✗ File upload failed: {e}")
         return None
@@ -96,12 +122,21 @@ def test_file_access(test_filename):
     
     return file_url
 
-def cleanup_test_file(ftp, test_filename):
+def cleanup_test_file(test_filename):
     """Remove test file from FTP"""
     print("\n[Cleanup] Removing test file...")
     try:
-        ftp.delete(test_filename)
-        print(f"✓ Test file deleted: {test_filename}")
+        with ftplib.FTP(FTP_HOST, timeout=10) as ftp:
+            ftp.login(FTP_USER, FTP_PASSWORD)
+            
+            if FTP_DIR:
+                try:
+                    ftp.cwd(FTP_DIR)
+                except ftplib.all_errors:
+                    pass
+            
+            ftp.delete(test_filename)
+            print(f"✓ Test file deleted: {test_filename}")
     except ftplib.all_errors as e:
         print(f"⚠ Could not delete test file: {e}")
 
@@ -119,8 +154,7 @@ def main():
     print_config()
     
     # Test connection
-    ftp = test_ftp_connection()
-    if not ftp:
+    if not test_ftp_connection():
         print("\n⚠ Connection failed. This may be due to:")
         print("  1. Network connectivity issues")
         print("  2. Incorrect FTP hostname")
@@ -130,17 +164,14 @@ def main():
         sys.exit(1)
     
     # Test directory access
-    if not test_directory_access(ftp):
-        ftp.quit()
+    if not test_directory_access():
         sys.exit(1)
     
     # Test file upload
-    test_filename = test_file_upload(ftp)
+    test_filename = test_file_upload()
     if test_filename:
         file_url = test_file_access(test_filename)
-        cleanup_test_file(ftp, test_filename)
-    
-    ftp.quit()
+        cleanup_test_file(test_filename)
     
     print("\n" + "="*60)
     print("✓ All FTP tests completed successfully!")
