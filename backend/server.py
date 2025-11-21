@@ -125,24 +125,49 @@ def _build_godaddy_url(file_name: str) -> str:
 
 
 async def upload_file_to_godaddy(file_name: str, content: bytes) -> str:
+    logger.info(f"📤 [FTP] Starting FTP upload for {file_name} ({len(content)} bytes)")
+    logger.info(f"📤 [FTP] FTP Host: {GODADDY_FTP_HOST}")
+    logger.info(f"📤 [FTP] FTP Port: {GODADDY_FTP_PORT}")
+    logger.info(f"📤 [FTP] FTP Dir: {GODADDY_FTP_DIR}")
+    
     if not _godaddy_configured():
+        logger.error("❌ [FTP] GoDaddy FTP is not configured")
         raise HTTPException(status_code=500, detail="GoDaddy FTP is not configured")
 
     def _upload():
-        with ftplib.FTP() as ftp:
+        logger.info(f"📤 [FTP] Creating FTP connection...")
+        with ftplib.FTP(timeout=10) as ftp:
+            logger.info(f"📤 [FTP] Connecting to {GODADDY_FTP_HOST}:{GODADDY_FTP_PORT}")
             ftp.connect(GODADDY_FTP_HOST, GODADDY_FTP_PORT)
+            logger.info(f"✅ [FTP] Connected successfully")
+            
+            logger.info(f"📤 [FTP] Logging in as {GODADDY_FTP_USER}")
             ftp.login(GODADDY_FTP_USER, GODADDY_FTP_PASSWORD)
+            logger.info(f"✅ [FTP] Login successful")
+            
             if GODADDY_FTP_DIR:
+                logger.info(f"📤 [FTP] Changing to directory: {GODADDY_FTP_DIR}")
                 ftp.cwd(GODADDY_FTP_DIR)
+                logger.info(f"✅ [FTP] Changed to directory successfully")
+            
+            logger.info(f"📤 [FTP] Uploading file {file_name}")
             ftp.storbinary(f"STOR {file_name}", io.BytesIO(content))
+            logger.info(f"✅ [FTP] File uploaded successfully")
 
     try:
+        logger.info(f"📤 [FTP] Running FTP upload in thread...")
         await asyncio.to_thread(_upload)
+        logger.info(f"✅ [FTP] FTP upload completed")
     except ftplib.all_errors as exc:
-        logger.error("Failed to upload file to GoDaddy via FTP: %s", exc)
+        logger.error(f"❌ [FTP] FTP error: {type(exc).__name__}: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
+    except Exception as exc:
+        logger.error(f"❌ [FTP] Unexpected error: {type(exc).__name__}: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
 
-    return _build_godaddy_url(file_name)
+    url = _build_godaddy_url(file_name)
+    logger.info(f"✅ [FTP] Built URL: {url}")
+    return url
 
 
 
@@ -975,36 +1000,51 @@ async def delete_partner(partner_id: str, admin: User = Depends(require_admin)):
 @api_router.post("/upload")
 async def upload_file(file: UploadFile = File(...), admin: User = Depends(require_admin)):
     try:
+        logger.info(f"📸 [Upload] Starting file upload for user {admin.email}")
+        
         if not file.filename:
+            logger.warning("📸 [Upload] Invalid file - no filename")
             raise HTTPException(status_code=400, detail=ERROR_MESSAGES["INVALID_FILE"])
+        
         file_extension = file.filename.split('.')[-1]
         file_name = f"{uuid.uuid4()}.{file_extension}"
         content = await file.read()
+        
+        logger.info(f"📸 [Upload] File info: {file.filename} ({len(content)} bytes) -> {file_name}")
+        logger.info(f"📸 [Upload] GoDaddy configured: {_godaddy_configured()}")
 
         if _godaddy_configured():
+            logger.info(f"📸 [Upload] Attempting GoDaddy FTP upload...")
             try:
                 # Try GoDaddy FTP upload first
                 file_url = await upload_file_to_godaddy(file_name, content)
-                logger.info(f"Successfully uploaded {file_name} to GoDaddy FTP")
+                logger.info(f"✅ [Upload] Successfully uploaded {file_name} to GoDaddy FTP")
+                logger.info(f"✅ [Upload] File URL: {file_url}")
             except Exception as ftp_error:
                 # Fallback to local storage if FTP fails
-                logger.warning(f"GoDaddy FTP upload failed for {file_name}: {str(ftp_error)}. Falling back to local storage.")
+                logger.warning(f"⚠️ [Upload] GoDaddy FTP upload failed: {str(ftp_error)}")
+                logger.info(f"📸 [Upload] Falling back to local storage...")
                 file_path = UPLOADS_DIR / file_name
                 async with aiofiles.open(file_path, 'wb') as f:
                     await f.write(content)
                 file_url = f"/api/uploads/{file_name}"
+                logger.info(f"✅ [Upload] Saved to local storage: {file_url}")
         else:
             # GoDaddy not configured, use local storage
+            logger.info(f"📸 [Upload] GoDaddy not configured, using local storage")
             file_path = UPLOADS_DIR / file_name
             async with aiofiles.open(file_path, 'wb') as f:
                 await f.write(content)
             file_url = f"/api/uploads/{file_name}"
+            logger.info(f"✅ [Upload] Saved to local storage: {file_url}")
         
+        logger.info(f"📸 [Upload] Upload complete. Returning: {file_url}")
         return {"url": file_url}
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Upload failed for file {file_name if 'file_name' in locals() else 'unknown'}: {str(e)}")
+        file_name_str = file_name if 'file_name' in locals() else 'unknown'
+        logger.error(f"❌ [Upload] Upload failed for {file_name_str}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to upload image")
 
 # Include the router in the main app
