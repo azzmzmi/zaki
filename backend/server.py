@@ -18,6 +18,8 @@ import jwt
 from passlib.context import CryptContext
 import aiofiles
 from enum import Enum
+import requests
+import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -47,14 +49,19 @@ UPLOADS_PATH = os.environ.get('UPLOADS_DIR', str(ROOT_DIR / 'uploads'))
 UPLOADS_DIR = Path(UPLOADS_PATH)
 UPLOADS_DIR.mkdir(exist_ok=True, parents=True)
 
-# GoDaddy FTP configuration
+# GoDaddy API configuration
+GODADDY_API_KEY = os.environ.get('GODADDY_API_KEY')
+GODADDY_API_SECRET = os.environ.get('GODADDY_API_SECRET')
+GODADDY_DOMAIN = os.environ.get('GODADDY_DOMAIN')
+GODADDY_BASE_URL = os.environ.get('GODADDY_BASE_URL')
+GODADDY_PUBLIC_PATH = os.environ.get('GODADDY_PUBLIC_PATH', '/uploads')
+
+# Legacy FTP configuration (kept for backwards compatibility)
 GODADDY_FTP_HOST = os.environ.get('GODADDY_FTP_HOST')
 GODADDY_FTP_PORT = int(os.environ.get('GODADDY_FTP_PORT', '21'))
 GODADDY_FTP_USER = os.environ.get('GODADDY_FTP_USERNAME')
 GODADDY_FTP_PASSWORD = os.environ.get('GODADDY_FTP_PASSWORD')
 GODADDY_FTP_DIR = os.environ.get('GODADDY_FTP_DIR', '')
-GODADDY_BASE_URL = os.environ.get('GODADDY_BASE_URL')
-GODADDY_PUBLIC_PATH = os.environ.get('GODADDY_PUBLIC_PATH', '/uploads')
 
 # Create the main app
 app = FastAPI(title="eCommerce API", version="1.0.0")
@@ -108,9 +115,8 @@ ERROR_MESSAGES = {
 }
 def _godaddy_configured() -> bool:
     return all([
-        GODADDY_FTP_HOST,
-        GODADDY_FTP_USER,
-        GODADDY_FTP_PASSWORD,
+        GODADDY_API_KEY,
+        GODADDY_DOMAIN,
         GODADDY_BASE_URL,
     ])
 
@@ -125,16 +131,103 @@ def _build_godaddy_url(file_name: str) -> str:
 
 
 async def upload_file_to_godaddy(file_name: str, content: bytes) -> str:
+    logger.info(f"📤 [API] Starting GoDaddy API upload for {file_name} ({len(content)} bytes)")
+    logger.info(f"📤 [API] Domain: {GODADDY_DOMAIN}")
+    logger.info(f"📤 [API] Base URL: {GODADDY_BASE_URL}")
+    logger.info(f"📤 [API] Public Path: {GODADDY_PUBLIC_PATH}")
+    
+    if not _godaddy_configured():
+        logger.error("❌ [API] GoDaddy API is not configured")
+        raise HTTPException(status_code=500, detail="GoDaddy API is not configured")
+
+    try:
+        # GoDaddy API endpoint for uploading files
+        # Using the CNAME approach - upload directly to the domain
+        api_url = f"https://api.godaddy.com/v1/domains/{GODADDY_DOMAIN}/records"
+        
+        # Create authorization header
+        auth_header = f"sso-key {GODADDY_API_KEY}:{GODADDY_API_SECRET}" if GODADDY_API_SECRET else f"sso-key {GODADDY_API_KEY}"
+        
+        headers = {
+            'Authorization': auth_header,
+            'Content-Type': 'application/octet-stream'
+        }
+        
+        # Upload file directly using WebDAV or file endpoint
+        # GoDaddy doesn't have a direct file upload API, so we'll use SFTP instead
+        logger.info(f"📤 [API] Using alternative method: Direct file write")
+        
+        # Since GoDaddy API doesn't support direct file uploads,
+        # we'll use SFTP which is more reliable than FTP
+        await upload_file_via_sftp(file_name, content)
+        
+    except Exception as exc:
+        logger.error(f"❌ [API] Upload error: {type(exc).__name__}: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
+
+    url = _build_godaddy_url(file_name)
+    logger.info(f"✅ [API] Built URL: {url}")
+    return url
+
+
+async def upload_file_via_sftp(file_name: str, content: bytes) -> None:
+    """Upload file via SFTP (more reliable than FTP)"""
+    logger.info(f"📤 [SFTP] Starting SFTP upload for {file_name}")
+    
+    try:
+        import paramiko
+        logger.info(f"📤 [SFTP] paramiko module available")
+    except ImportError:
+        logger.warning(f"⚠️ [SFTP] paramiko not available, using FTP fallback")
+        # Fallback to FTP if paramiko not available
+        await upload_file_to_godaddy_ftp(file_name, content)
+        return
+    
+    def _upload_sftp():
+        import paramiko
+        logger.info(f"📤 [SFTP] Creating SFTP connection...")
+        
+        # Use FTP host but port 22 for SFTP
+        transport = paramiko.Transport((GODADDY_FTP_HOST, 22))
+        logger.info(f"📤 [SFTP] Authenticating as {GODADDY_FTP_USER}")
+        transport.connect(username=GODADDY_FTP_USER, password=GODADDY_FTP_PASSWORD)
+        sftp = paramiko.SFTPClient.from_transport(transport)
+        logger.info(f"✅ [SFTP] Connected successfully")
+        
+        # Build remote path
+        remote_dir = GODADDY_FTP_DIR if GODADDY_FTP_DIR else 'public_html/uploads'
+        remote_path = f"{remote_dir}/{file_name}"
+        
+        try:
+            logger.info(f"📤 [SFTP] Creating directory if needed: {remote_dir}")
+            sftp.mkdir(remote_dir)
+        except IOError:
+            pass  # Directory might already exist
+        
+        logger.info(f"📤 [SFTP] Uploading to: {remote_path}")
+        sftp.putfo(io.BytesIO(content), remote_path)
+        logger.info(f"✅ [SFTP] File uploaded successfully")
+        
+        sftp.close()
+        transport.close()
+    
+    try:
+        logger.info(f"📤 [SFTP] Running SFTP upload in thread...")
+        await asyncio.to_thread(_upload_sftp)
+        logger.info(f"✅ [SFTP] SFTP upload completed")
+    except Exception as exc:
+        logger.error(f"❌ [SFTP] SFTP error: {type(exc).__name__}: {exc}", exc_info=True)
+        raise
+
+
+async def upload_file_to_godaddy_ftp(file_name: str, content: bytes) -> str:
+    """Legacy FTP upload (fallback method)"""
     logger.info(f"📤 [FTP] Starting FTP upload for {file_name} ({len(content)} bytes)")
     logger.info(f"📤 [FTP] FTP Host: {GODADDY_FTP_HOST}")
     logger.info(f"📤 [FTP] FTP Port: {GODADDY_FTP_PORT}")
     logger.info(f"📤 [FTP] FTP Dir: {GODADDY_FTP_DIR}")
-    logger.info(f"📤 [FTP] FTP User: {GODADDY_FTP_USER}")
-    logger.info(f"📤 [FTP] FTP Password length: {len(GODADDY_FTP_PASSWORD) if GODADDY_FTP_PASSWORD else 0}")
-    logger.info(f"📤 [FTP] FTP Password (masked): {'*' * len(GODADDY_FTP_PASSWORD) if GODADDY_FTP_PASSWORD else 'EMPTY'}")
-    logger.info(f"📤 [FTP] FTP Password first/last char: {GODADDY_FTP_PASSWORD[0] if GODADDY_FTP_PASSWORD else '?'}/{GODADDY_FTP_PASSWORD[-1] if GODADDY_FTP_PASSWORD else '?'}")
     
-    if not _godaddy_configured():
+    if not all([GODADDY_FTP_HOST, GODADDY_FTP_USER, GODADDY_FTP_PASSWORD]):
         logger.error("❌ [FTP] GoDaddy FTP is not configured")
         raise HTTPException(status_code=500, detail="GoDaddy FTP is not configured")
 
@@ -169,9 +262,7 @@ async def upload_file_to_godaddy(file_name: str, content: bytes) -> str:
         logger.error(f"❌ [FTP] Unexpected error: {type(exc).__name__}: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
 
-    url = _build_godaddy_url(file_name)
-    logger.info(f"✅ [FTP] Built URL: {url}")
-    return url
+    return _build_godaddy_url(file_name)
 
 
 
