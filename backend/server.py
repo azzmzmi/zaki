@@ -129,6 +129,10 @@ async def upload_file_to_godaddy(file_name: str, content: bytes) -> str:
     logger.info(f"📤 [FTP] FTP Host: {GODADDY_FTP_HOST}")
     logger.info(f"📤 [FTP] FTP Port: {GODADDY_FTP_PORT}")
     logger.info(f"📤 [FTP] FTP Dir: {GODADDY_FTP_DIR}")
+    logger.info(f"📤 [FTP] FTP User: {GODADDY_FTP_USER}")
+    logger.info(f"📤 [FTP] FTP Password length: {len(GODADDY_FTP_PASSWORD) if GODADDY_FTP_PASSWORD else 0}")
+    logger.info(f"📤 [FTP] FTP Password (masked): {'*' * len(GODADDY_FTP_PASSWORD) if GODADDY_FTP_PASSWORD else 'EMPTY'}")
+    logger.info(f"📤 [FTP] FTP Password first/last char: {GODADDY_FTP_PASSWORD[0] if GODADDY_FTP_PASSWORD else '?'}/{GODADDY_FTP_PASSWORD[-1] if GODADDY_FTP_PASSWORD else '?'}")
     
     if not _godaddy_configured():
         logger.error("❌ [FTP] GoDaddy FTP is not configured")
