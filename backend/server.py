@@ -10,6 +10,9 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
+import asyncio
+import ftplib
+import io
 from datetime import datetime, timezone, timedelta
 import jwt
 from passlib.context import CryptContext
@@ -43,6 +46,14 @@ security = HTTPBearer()
 UPLOADS_PATH = os.environ.get('UPLOADS_DIR', str(ROOT_DIR / 'uploads'))
 UPLOADS_DIR = Path(UPLOADS_PATH)
 UPLOADS_DIR.mkdir(exist_ok=True, parents=True)
+
+# GoDaddy FTP configuration
+GODADDY_FTP_HOST = os.environ.get('GODADDY_FTP_HOST')
+GODADDY_FTP_USER = os.environ.get('GODADDY_FTP_USERNAME')
+GODADDY_FTP_PASSWORD = os.environ.get('GODADDY_FTP_PASSWORD')
+GODADDY_FTP_DIR = os.environ.get('GODADDY_FTP_DIR', '')
+GODADDY_BASE_URL = os.environ.get('GODADDY_BASE_URL')
+GODADDY_PUBLIC_PATH = os.environ.get('GODADDY_PUBLIC_PATH', '/uploads')
 
 # Create the main app
 app = FastAPI(title="eCommerce API", version="1.0.0")
@@ -86,6 +97,42 @@ ERROR_MESSAGES = {
     "UNSUPPORTED_LANGUAGE": "Unsupported language",
     "INVALID_FILE": "Invalid file",
 }
+def _godaddy_configured() -> bool:
+    return all([
+        GODADDY_FTP_HOST,
+        GODADDY_FTP_USER,
+        GODADDY_FTP_PASSWORD,
+        GODADDY_BASE_URL,
+    ])
+
+
+def _build_godaddy_url(file_name: str) -> str:
+    base_url = GODADDY_BASE_URL.rstrip('/')
+    public_path = GODADDY_PUBLIC_PATH if GODADDY_PUBLIC_PATH.startswith('/') else f"/{GODADDY_PUBLIC_PATH}"
+    return f"{base_url}{public_path.rstrip('/')}/{file_name}"
+
+
+async def upload_file_to_godaddy(file_name: str, content: bytes) -> str:
+    if not _godaddy_configured():
+        raise HTTPException(status_code=500, detail="GoDaddy FTP is not configured")
+
+    def _upload():
+        with ftplib.FTP(GODADDY_FTP_HOST) as ftp:
+            ftp.login(GODADDY_FTP_USER, GODADDY_FTP_PASSWORD)
+            if GODADDY_FTP_DIR:
+                ftp.cwd(GODADDY_FTP_DIR)
+            ftp.storbinary(f"STOR {file_name}", io.BytesIO(content))
+
+    try:
+        await asyncio.to_thread(_upload)
+    except ftplib.all_errors as exc:
+        logger.error("Failed to upload file to GoDaddy via FTP: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
+
+    return _build_godaddy_url(file_name)
+
+
+
 class UserRole(str, Enum):
     ADMIN = "admin"
     CUSTOMER = "customer"
@@ -918,14 +965,24 @@ async def upload_file(file: UploadFile = File(...), admin: User = Depends(requir
         raise HTTPException(status_code=400, detail=ERROR_MESSAGES["INVALID_FILE"])
     file_extension = file.filename.split('.')[-1]
     file_name = f"{uuid.uuid4()}.{file_extension}"
-    file_path = UPLOADS_DIR / file_name
+ #   file_path = UPLOADS_DIR / file_name
     
-    async with aiofiles.open(file_path, 'wb') as f:
-        content = await file.read()
-        await f.write(content)
+  #  async with aiofiles.open(file_path, 'wb') as f:
+   #     content = await file.read()
+    #    await f.write(content)
     
     # Return URL with /api prefix so it's accessible through Kubernetes ingress
-    file_url = f"/api/uploads/{file_name}"
+    #file_url = f"/api/uploads/{file_name}"
+    content = await file.read()
+
+    if _godaddy_configured():
+        file_url = await upload_file_to_godaddy(file_name, content)
+    else:
+        file_path = UPLOADS_DIR / file_name
+        async with aiofiles.open(file_path, 'wb') as f:
+            await f.write(content)
+        # Return URL with /api prefix so it's accessible through Kubernetes ingress
+        file_url = f"/api/uploads/{file_name}"
     return {"url": file_url}
 
 # Include the router in the main app
