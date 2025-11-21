@@ -117,6 +117,9 @@ def _godaddy_configured() -> bool:
 
 def _build_godaddy_url(file_name: str) -> str:
     base_url = GODADDY_BASE_URL.rstrip('/')
+    # Ensure URL starts with https://
+    if not base_url.startswith('http://') and not base_url.startswith('https://'):
+        base_url = f'https://{base_url}'
     public_path = GODADDY_PUBLIC_PATH if GODADDY_PUBLIC_PATH.startswith('/') else f"/{GODADDY_PUBLIC_PATH}"
     return f"{base_url}{public_path.rstrip('/')}/{file_name}"
 
