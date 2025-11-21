@@ -75,6 +75,17 @@ MONGO_URL="mongodb://localhost:27017"
 DB_NAME="ecommerce_db"
 CORS_ORIGINS="http://localhost:3000"
 JWT_SECRET="your-super-secret-jwt-key-change-in-production"
+
+# Local uploads directory (used when GoDaddy FTP credentials are not provided)
+UPLOADS_DIR="uploads"
+
+# GoDaddy FTP configuration (optional, required for remote uploads)
+GODADDY_FTP_HOST="your-godaddy-ftp-host"
+GODADDY_FTP_USERNAME="your-godaddy-ftp-username"
+GODADDY_FTP_PASSWORD="your-godaddy-ftp-password"
+GODADDY_FTP_DIR="public_html/uploads"
+GODADDY_BASE_URL="https://your-domain.com"
+GODADDY_PUBLIC_PATH="/uploads"
 ```
 
 **Run backend:**
@@ -204,6 +215,17 @@ MONGO_URL="mongodb://localhost:27017"
 DB_NAME="ecommerce_db"
 CORS_ORIGINS="http://localhost:3000"
 JWT_SECRET="change-this-to-a-random-secret-key"
+
+# Local uploads directory (used when GoDaddy FTP credentials are not provided)
+UPLOADS_DIR="uploads"
+
+# GoDaddy FTP configuration (optional, required for remote uploads)
+GODADDY_FTP_HOST="your-godaddy-ftp-host"
+GODADDY_FTP_USERNAME="your-godaddy-ftp-username"
+GODADDY_FTP_PASSWORD="your-godaddy-ftp-password"
+GODADDY_FTP_DIR="public_html/uploads"
+GODADDY_BASE_URL="https://your-domain.com"
+GODADDY_PUBLIC_PATH="/uploads"
 ```
 
 **frontend/.env.example:**
