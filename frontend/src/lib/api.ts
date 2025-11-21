@@ -104,10 +104,29 @@ export const analyticsApi = {
 // Upload API
 export const uploadApi = {
   upload: (file: File) => {
+    console.log('📤 [API] uploadApi.upload() called with file:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
+    
     const formData = new FormData();
     formData.append('file', file);
+    
+    console.log('📤 [API] Posting to /upload endpoint');
     return api.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
+    }).then(response => {
+      console.log('✅ [API] /upload response received:', response.data);
+      return response;
+    }).catch(error => {
+      console.error('❌ [API] /upload failed:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        errorData: error.response?.data,
+        errorMessage: error.message
+      });
+      throw error;
     });
   }
 };
