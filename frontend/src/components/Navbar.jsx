@@ -105,6 +105,9 @@ export default function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link to="/profile">{t("profile.title")}</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">{t("nav.settings")}</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     {t("nav.logout")}
                   </DropdownMenuItem>
@@ -195,6 +198,9 @@ export default function Navbar() {
                     <>
                       <DropdownMenuItem asChild>
                         <Link to="/profile">{t("profile.title")}</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/settings">{t("nav.settings")}</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleLogout}>
                         {t("nav.logout")}

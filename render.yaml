@@ -10,16 +10,13 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
-      - key: UPLOADS_DIR
-        value: /opt/render/project/src/backend/uploads
+      # GoDaddy FTP Configuration - Set these in Render Dashboard Environment variables
+      # GODADDY_FTP_HOST, GODADDY_FTP_USERNAME, GODADDY_FTP_PASSWORD, 
+      # GODADDY_FTP_DIR, GODADDY_BASE_URL, GODADDY_PUBLIC_PATH
     healthCheckPath: /api/analytics
     routes:
       - type: http
         source: /
         destination: /
     preDeployCommand: echo 'Starting deployment'
-    # Persistent disk for uploaded images
-    disk:
-      name: uploads-disk
-      mountPath: /opt/render/project/src/backend/uploads
-      sizeGB: 1
+    # NOTE: Persistent disk removed - using GoDaddy FTP for file uploads instead
