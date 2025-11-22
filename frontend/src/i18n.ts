@@ -42,6 +42,8 @@ const resources = {
       'nav.theme.dark': 'Dark',
       'nav.theme.system': 'System',
       'nav.language': 'Language',
+      'nav.language.english': 'English',
+      'nav.language.arabic': 'العربية',
       
       
       // Auth
@@ -504,6 +506,8 @@ const resources = {
       'nav.theme.dark': 'داكن',
       'nav.theme.system': 'النظام',
       'nav.language': 'اللغة',
+      'nav.language.english': 'English',
+      'nav.language.arabic': 'عربي',
 
       
       // Auth

@@ -160,7 +160,7 @@ export default function Navbar() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <div className="text-sm font-medium cursor-pointer hover:text-blue-600 transition-colors">
-                          {i18n.language === "en" ? "English" : "عربي"}
+                          {i18n.language === "en" ? t('nav.language.english') : t('nav.language.arabic')}
                         </div>
                       </DropdownMenuTrigger>
 
