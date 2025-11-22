@@ -26,7 +26,6 @@ export default function Home() {
   const { data: queryData = {} } = useQuery({
     queryKey: ['homepage-products', currentPage],
     queryFn: async () => {
-      console.log(`📖 [Pagination] Fetching page ${currentPage} with ${PRODUCTS_PER_PAGE} products per page`);
       const response = await productsApi.getAll(
         undefined,
         undefined,
@@ -37,9 +36,7 @@ export default function Home() {
       // Handle both old array format and new paginated format
       const products = response.data?.data || response.data || [];
       const pagination = response.data?.pagination || {};
-      
-      console.log("🛍️ [Products] Fetched:", products.length, "products");
-      console.log("📊 [Pagination] Info:", pagination);
+
       
       return {
         products: products?.sort((a, b) => b.stock - a.stock) || [],
@@ -54,16 +51,11 @@ export default function Home() {
   
   const totalProducts = paginationInfo.total || 0;
   const totalPages = paginationInfo.pages || 1;
-  
-  console.log("📈 [Home] Total products:", totalProducts);
-  console.log("📈 [Home] Total pages:", totalPages);
-  console.log("📈 [Home] Current page:", currentPage);
-  
+
   const products = allProducts;
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
-      console.log(`➡️ [Pagination] Moving to page ${currentPage + 1}`);
       setCurrentPage(currentPage + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -71,7 +63,6 @@ export default function Home() {
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      console.log(`⬅️ [Pagination] Moving to page ${currentPage - 1}`);
       setCurrentPage(currentPage - 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -288,7 +279,6 @@ export default function Home() {
                           }
                           size="sm"
                           onClick={() => {
-                            console.log(`📖 [Pagination] User clicked page ${pageNum}`);
                             setCurrentPage(pageNum);
                             window.scrollTo({
                               top: document.getElementById("featured-products")

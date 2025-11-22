@@ -24,7 +24,6 @@ export const useImageCache = () => {
    */
   const clearCache = () => {
     cacheImage.clear();
-    console.log('🗑️ [ImageCache] Cache cleared by user');
   };
 
   /**

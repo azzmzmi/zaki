@@ -13,14 +13,13 @@ export const getImageUrl = (imageUrl) => {
   
   // If it's a GoDaddy URL (abaadexp.com), try it first but may need fallback
   if (imageUrl.startsWith('https://z') || imageUrl.startsWith('http://z')) {
-    console.log('🌐 [ImageURL] GoDaddy URL detected:', imageUrl);
     // Return GoDaddy URL - the OptimizedImage component will handle fallback
     return imageUrl;
   }
   
   // If it's any other external URL (Unsplash, etc.), return as is
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-    console.log('🌐 [ImageURL] External URL:', imageUrl);
+    // console.log('🌐 [ImageURL] External URL:', imageUrl);
     return imageUrl;
   }
   
@@ -28,20 +27,20 @@ export const getImageUrl = (imageUrl) => {
   if (imageUrl.startsWith('/api/uploads/')) {
     imageUrl = imageUrl.replace('/api/uploads/', '');
     const fullUrl = `https://abaadexp.com/uploads/${imageUrl}`;
-    console.log('💾 [ImageURL] Local backend URL:', fullUrl);
+    // console.log('💾 [ImageURL] Local backend URL:', fullUrl);
     return fullUrl;
   }
   
   // If it's a relative path (starts with /), prepend backend URL
   if (imageUrl.startsWith('/')) {
     const fullUrl = `${backendUrl}${imageUrl}`;
-    console.log('📂 [ImageURL] Relative path converted:', fullUrl);
+    // console.log('📂 [ImageURL] Relative path converted:', fullUrl);
     return fullUrl;
   }
   
   // Otherwise, assume it's a relative path without leading slash
   const fullUrl = `https://abaadexp.com/uploads/${imageUrl}`;
-  console.log('📂 [ImageURL] Path converted:', fullUrl);
+  // console.log('📂 [ImageURL] Path converted:', fullUrl);
   return fullUrl;
 };
 

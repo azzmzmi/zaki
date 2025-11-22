@@ -23,7 +23,6 @@ export default function EditUserModal({ user, open, onOpenChange }) {
 
   const updateMutation = useMutation({
     mutationFn: async (data) => {
-      console.log(`Updating user ${user.id} with data:`, data);
       const response = await axios.put(
         `${API_URL}/api/auth/profile/${user.id}`,
         data,

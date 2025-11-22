@@ -56,11 +56,9 @@ export default function OptimizedImage({
 
     // Check cache first
     const cacheStatus = cacheImage.getStatus(src);
-    console.log(`🖼️ [ImageCache] Status for ${src.substring(0, 50)}...: ${cacheStatus}`);
     
     if (cacheStatus === 'loaded') {
       // Already cached and loaded successfully
-      console.log(`✅ [ImageCache] Using cached image: ${src.substring(0, 50)}...`);
       try {
         let options = {};
         if (size) {
@@ -120,7 +118,6 @@ export default function OptimizedImage({
     // Mark as successfully loaded in cache
     if (src) {
       cacheImage.markLoaded(src);
-      console.log(`✅ [ImageCache] Successfully loaded: ${src.substring(0, 50)}...`);
     }
     setIsLoading(false);
     setHasError(false);

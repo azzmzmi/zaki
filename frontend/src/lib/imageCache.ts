@@ -40,7 +40,6 @@ class ImageCacheManager {
             this.cache.set(url, entry);
           }
         });
-        console.log(`💾 [ImageCache] Restored ${this.cache.size} cached images from localStorage`);
       }
     } catch (error) {
       console.warn('📸 [ImageCache] Failed to restore from localStorage:', error);
@@ -109,7 +108,6 @@ class ImageCacheManager {
 
     // Return existing promise if already loading
     if (this.loadingPromises.has(url)) {
-      console.log(`⏳ [ImageCache] Waiting for existing load promise for: ${url}`);
       return this.loadingPromises.get(url);
     }
 
@@ -142,7 +140,6 @@ class ImageCacheManager {
 
     this.cache.set(url, entry);
     this.saveToLocalStorage();
-    console.log(`✅ [ImageCache] Cached: ${url}`);
   }
 
   /**
@@ -167,10 +164,6 @@ class ImageCacheManager {
     this.saveToLocalStorage();
 
     const canRetry = existing.errorCount < this.MAX_ERROR_RETRIES;
-    console.log(
-      `❌ [ImageCache] Error loading ${url} (attempt ${existing.errorCount}/${this.MAX_ERROR_RETRIES})`,
-      error || ''
-    );
 
     return canRetry;
   }
@@ -185,7 +178,6 @@ class ImageCacheManager {
     if (this.USE_LOCALSTORAGE && typeof window !== 'undefined') {
       try {
         localStorage.removeItem(this.STORAGE_KEY);
-        console.log('🗑️ [ImageCache] Cache cleared');
       } catch (error) {
         console.warn('📸 [ImageCache] Failed to clear localStorage:', error);
       }
@@ -230,7 +222,6 @@ class ImageCacheManager {
    */
   logStats(): void {
     const stats = this.getStats();
-    console.log('📊 [ImageCache] Stats:', stats);
   }
 }
 
