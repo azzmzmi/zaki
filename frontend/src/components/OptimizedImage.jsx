@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getOptimizedImageUrl, supportsWebP, getImageUrl, getSizeForContext } from '@/lib/imageUtils';
+import { cacheImage } from '@/lib/imageCache';
 
 /**
  * OptimizedImage Component
@@ -53,7 +54,40 @@ export default function OptimizedImage({
       return;
     }
 
+    // Check cache first
+    const cacheStatus = cacheImage.getStatus(src);
+    console.log(`🖼️ [ImageCache] Status for ${src.substring(0, 50)}...: ${cacheStatus}`);
+    
+    if (cacheStatus === 'loaded') {
+      // Already cached and loaded successfully
+      console.log(`✅ [ImageCache] Using cached image: ${src.substring(0, 50)}...`);
+      try {
+        let options = {};
+        if (size) {
+          options.size = size;
+        } else if (width || height || quality !== undefined) {
+          if (width) options.width = width;
+          if (height) options.height = height;
+          if (quality !== undefined) options.quality = quality;
+        } else {
+          options.size = 'medium';
+        }
+        const optimized = getOptimizedImageUrl(src, options);
+        const urlToUse = webpSupported ? optimized.webp : optimized.fallback;
+        setImageSrc(urlToUse);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error optimizing cached image:', error);
+        setImageSrc(getImageUrl(src));
+        setIsLoading(false);
+      }
+      return;
+    }
+
     try {
+      // Mark as loading
+      cacheImage.markLoading(src);
+
       // Determine optimization options
       let options = {};
       
@@ -74,13 +108,20 @@ export default function OptimizedImage({
       // Use WebP if supported, otherwise use fallback
       const urlToUse = webpSupported ? optimized.webp : optimized.fallback;
       setImageSrc(urlToUse);
+      setIsLoading(true);
     } catch (error) {
       console.error('Error optimizing image:', error);
       setImageSrc(getImageUrl(src));
+      setIsLoading(true);
     }
   }, [src, width, height, quality, size, webpSupported]);
 
   const handleLoad = (e) => {
+    // Mark as successfully loaded in cache
+    if (src) {
+      cacheImage.markLoaded(src);
+      console.log(`✅ [ImageCache] Successfully loaded: ${src.substring(0, 50)}...`);
+    }
     setIsLoading(false);
     setHasError(false);
     onLoad?.(e);
@@ -89,6 +130,9 @@ export default function OptimizedImage({
   const handleError = (e) => {
     setIsLoading(false);
     setHasError(true);
+    
+    // Check if we should retry
+    const canRetry = src ? cacheImage.markError(src, e.message) : false;
     
     // Try fallback if WebP failed
     if (webpSupported && imageSrc && imageSrc.includes('fmt=webp')) {
