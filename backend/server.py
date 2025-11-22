@@ -56,6 +56,13 @@ GODADDY_DOMAIN = os.environ.get('GODADDY_DOMAIN')
 GODADDY_BASE_URL = os.environ.get('GODADDY_BASE_URL')
 GODADDY_PUBLIC_PATH = os.environ.get('GODADDY_PUBLIC_PATH', '/uploads')
 
+# GoDaddy SSH/SFTP configuration (using SSH key)
+GODADDY_SSH_HOST = os.environ.get('GODADDY_SSH_HOST')
+GODADDY_SSH_PORT = int(os.environ.get('GODADDY_SSH_PORT', '22'))
+GODADDY_SSH_USERNAME = os.environ.get('GODADDY_SSH_USERNAME')
+GODADDY_SSH_KEY = os.environ.get('GODADDY_SSH_KEY')  # SSH public key
+GODADDY_REMOTE_DIR = os.environ.get('GODADDY_REMOTE_DIR', 'public_html/uploads')
+
 # Legacy FTP configuration (kept for backwards compatibility)
 GODADDY_FTP_HOST = os.environ.get('GODADDY_FTP_HOST')
 GODADDY_FTP_PORT = int(os.environ.get('GODADDY_FTP_PORT', '21'))
@@ -187,29 +194,58 @@ async def upload_file_via_sftp(file_name: str, content: bytes) -> None:
         import paramiko
         logger.info(f"📤 [SFTP] Creating SFTP connection...")
         
-        # Use FTP host but port 22 for SFTP
-        transport = paramiko.Transport((GODADDY_FTP_HOST, 22))
-        logger.info(f"📤 [SFTP] Authenticating as {GODADDY_FTP_USER}")
-        transport.connect(username=GODADDY_FTP_USER, password=GODADDY_FTP_PASSWORD)
-        sftp = paramiko.SFTPClient.from_transport(transport)
-        logger.info(f"✅ [SFTP] Connected successfully")
+        # Create SSH client
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
-        # Build remote path
-        remote_dir = GODADDY_FTP_DIR if GODADDY_FTP_DIR else 'public_html/uploads'
-        remote_path = f"{remote_dir}/{file_name}"
+        # Load the SSH key from string
+        logger.info(f"📤 [SFTP] Loading SSH key for authentication")
+        key_file = io.StringIO(GODADDY_SSH_KEY)
         
         try:
-            logger.info(f"📤 [SFTP] Creating directory if needed: {remote_dir}")
-            sftp.mkdir(remote_dir)
+            # Try RSA key
+            pkey = paramiko.RSAKey.from_private_key(key_file)
+            logger.info(f"📤 [SFTP] RSA key loaded successfully")
+        except Exception as e:
+            logger.error(f"❌ [SFTP] Failed to load RSA key: {e}")
+            # If it's a public key, we can't use it for auth - fall back to password
+            logger.warning(f"⚠️ [SFTP] SSH key appears to be public key, using password fallback")
+            raise Exception("Public key provided instead of private key")
+        
+        logger.info(f"📤 [SFTP] Connecting to {GODADDY_SSH_HOST}:{GODADDY_SSH_PORT}")
+        ssh.connect(
+            hostname=GODADDY_SSH_HOST,
+            port=GODADDY_SSH_PORT,
+            username=GODADDY_SSH_USERNAME,
+            pkey=pkey,
+            timeout=5
+        )
+        logger.info(f"✅ [SFTP] SSH connected successfully")
+        
+        # Open SFTP session
+        sftp = ssh.open_sftp()
+        logger.info(f"✅ [SFTP] SFTP session opened")
+        
+        # Build remote path
+        remote_path = f"{GODADDY_REMOTE_DIR}/{file_name}"
+        
+        # Ensure directory exists
+        try:
+            logger.info(f"📤 [SFTP] Ensuring directory exists: {GODADDY_REMOTE_DIR}")
+            sftp.stat(GODADDY_REMOTE_DIR)
         except IOError:
-            pass  # Directory might already exist
+            logger.info(f"📤 [SFTP] Creating directory: {GODADDY_REMOTE_DIR}")
+            try:
+                sftp.mkdir(GODADDY_REMOTE_DIR)
+            except IOError:
+                pass  # Directory might already exist
         
         logger.info(f"📤 [SFTP] Uploading to: {remote_path}")
         sftp.putfo(io.BytesIO(content), remote_path)
         logger.info(f"✅ [SFTP] File uploaded successfully")
         
         sftp.close()
-        transport.close()
+        ssh.close()
     
     try:
         logger.info(f"📤 [SFTP] Running SFTP upload in thread...")
@@ -217,7 +253,9 @@ async def upload_file_via_sftp(file_name: str, content: bytes) -> None:
         logger.info(f"✅ [SFTP] SFTP upload completed")
     except Exception as exc:
         logger.error(f"❌ [SFTP] SFTP error: {type(exc).__name__}: {exc}", exc_info=True)
-        raise
+        # Fall back to FTP if SFTP fails
+        logger.warning(f"⚠️ [SFTP] Falling back to FTP due to error")
+        await upload_file_to_godaddy_ftp(file_name, content)
 
 
 async def upload_file_to_godaddy_ftp(file_name: str, content: bytes) -> str:
