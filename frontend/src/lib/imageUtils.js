@@ -1,7 +1,7 @@
 /**
  * Get the full image URL for a product
- * Handles external URLs (Unsplash), local backend uploads, and GoDaddy FTP uploads
- * Automatically optimizes to WebP format when supported
+ * Handles external URLs (Unsplash), local backend uploads, and GoDaddy uploads
+ * Automatically falls back to backend if GoDaddy image doesn't exist
  */
 export const getImageUrl = (imageUrl) => {
   if (!imageUrl) {
@@ -9,27 +9,39 @@ export const getImageUrl = (imageUrl) => {
     return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&h=400&q=80';
   }
   
-  // If it's an external URL (starts with http:// or https://), return as is
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  
+  // If it's a GoDaddy URL (abaadexp.com), try it first but may need fallback
+  if (imageUrl.startsWith('https://abaadexp.com/') || imageUrl.startsWith('http://abaadexp.com/')) {
+    console.log('🌐 [ImageURL] GoDaddy URL detected:', imageUrl);
+    // Return GoDaddy URL - the OptimizedImage component will handle fallback
     return imageUrl;
   }
   
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-  const isLocalhost = backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1');
+  // If it's any other external URL (Unsplash, etc.), return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    console.log('🌐 [ImageURL] External URL:', imageUrl);
+    return imageUrl;
+  }
   
   // If it's the /api/uploads path (local uploads or fallback)
   if (imageUrl.startsWith('/api/uploads/')) {
-    // Use the backend URL directly for API uploads
-    return `${backendUrl}${imageUrl}`;
+    const fullUrl = `${backendUrl}${imageUrl}`;
+    console.log('💾 [ImageURL] Local backend URL:', fullUrl);
+    return fullUrl;
   }
   
   // If it's a relative path (starts with /), prepend backend URL
   if (imageUrl.startsWith('/')) {
-    return `${backendUrl}${imageUrl}`;
+    const fullUrl = `${backendUrl}${imageUrl}`;
+    console.log('📂 [ImageURL] Relative path converted:', fullUrl);
+    return fullUrl;
   }
   
   // Otherwise, assume it's a relative path without leading slash
-  return `${backendUrl}/${imageUrl}`;
+  const fullUrl = `${backendUrl}/${imageUrl}`;
+  console.log('📂 [ImageURL] Path converted:', fullUrl);
+  return fullUrl;
 };
 
 /**
