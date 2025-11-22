@@ -149,15 +149,37 @@ export default function AdminProducts() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.log('📸 [Upload] Starting file upload', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      backendUrl: process.env.REACT_APP_BACKEND_URL
+    });
+
     setUploading(true);
     try {
+      console.log('📸 [Upload] Calling uploadApi.upload()...');
       const response = await uploadApi.upload(file);
+      
+      console.log('✅ [Upload] Success! Response:', {
+        url: response.data.url,
+        fullResponse: response.data
+      });
+      
       setFormData({ ...formData, image_url: response.data.url });
       toast.success(t('product.imageUploaded'));
     } catch (error) {
+      console.error('❌ [Upload] Failed!', {
+        error: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        fullError: error
+      });
       toast.error(t('product.uploadImageFailed'));
     } finally {
       setUploading(false);
+      console.log('📸 [Upload] Upload process finished');
     }
   };
 

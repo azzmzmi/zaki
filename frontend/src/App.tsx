@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 
 // Lazy load admin pages for better performance
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -114,6 +115,11 @@ function App() {
                 <Route path="/profile" element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 } />
                 

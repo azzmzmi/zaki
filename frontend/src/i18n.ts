@@ -288,6 +288,19 @@ const resources = {
       'profile.editUser': 'Edit User',
       'profile.title': 'My Profile',
       
+      // Settings
+      'settings.description': 'Manage your account settings and preferences',
+      'settings.appearance': 'Appearance',
+      'settings.language': 'Language',
+      'settings.account': 'Account',
+      'settings.privacy': 'Privacy & Security',
+      'settings.chooseTheme': 'Choose your preferred theme',
+      'settings.languageDescription': 'Change the interface language',
+      'settings.accountDescription': 'Manage your account information and password',
+      'settings.accountInfo': 'Account Information',
+      'settings.additionalInfo': 'Additional Information',
+      'settings.infoText': 'Your settings are saved automatically and synced across all your devices.',
+      
       // Form Validation
       'form.required': '*',
       'form.selectCategory': 'Select category',
@@ -725,6 +738,19 @@ const resources = {
       // Form Validation
       'form.required': '*',
       'form.selectCategory': 'اختر فئة',
+      
+      // Settings
+      'settings.description': 'إدارة إعدادات حسابك وتفضيلاتك',
+      'settings.appearance': 'المظهر',
+      'settings.language': 'اللغة',
+      'settings.account': 'الحساب',
+      'settings.privacy': 'الخصوصية والأمان',
+      'settings.chooseTheme': 'اختر المظهر المفضل لديك',
+      'settings.languageDescription': 'تغيير لغة الواجهة',
+      'settings.accountDescription': 'إدارة معلومات حسابك وكلمة المرور',
+      'settings.accountInfo': 'معلومات الحساب',
+      'settings.additionalInfo': 'معلومات إضافية',
+      'settings.infoText': 'يتم حفظ إعداداتك تلقائيًا ومزامنتها عبر جميع أجهزتك.',
       
       // User Management
       'user.email': 'البريد الإلكتروني (قراءة فقط)',

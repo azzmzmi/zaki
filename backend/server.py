@@ -10,11 +10,16 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
+import asyncio
+import ftplib
+import io
 from datetime import datetime, timezone, timedelta
 import jwt
 from passlib.context import CryptContext
 import aiofiles
 from enum import Enum
+import requests
+import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -44,16 +49,45 @@ UPLOADS_PATH = os.environ.get('UPLOADS_DIR', str(ROOT_DIR / 'uploads'))
 UPLOADS_DIR = Path(UPLOADS_PATH)
 UPLOADS_DIR.mkdir(exist_ok=True, parents=True)
 
+# GoDaddy API configuration
+GODADDY_API_KEY = os.environ.get('GODADDY_API_KEY')
+GODADDY_API_SECRET = os.environ.get('GODADDY_API_SECRET')
+GODADDY_DOMAIN = os.environ.get('GODADDY_DOMAIN')
+GODADDY_BASE_URL = os.environ.get('GODADDY_BASE_URL')
+GODADDY_PUBLIC_PATH = os.environ.get('GODADDY_PUBLIC_PATH', '/uploads')
+
+# GoDaddy SSH/SFTP configuration (using SSH key)
+GODADDY_SSH_HOST = os.environ.get('GODADDY_SSH_HOST')
+GODADDY_SSH_PORT = int(os.environ.get('GODADDY_SSH_PORT', '22'))
+GODADDY_SSH_USERNAME = os.environ.get('GODADDY_SSH_USERNAME')
+GODADDY_SSH_KEY = os.environ.get('GODADDY_SSH_KEY')  # SSH public key
+GODADDY_REMOTE_DIR = os.environ.get('GODADDY_REMOTE_DIR', 'public_html/uploads')
+
+# Legacy FTP configuration (kept for backwards compatibility)
+GODADDY_FTP_HOST = os.environ.get('GODADDY_FTP_HOST')
+GODADDY_FTP_PORT = int(os.environ.get('GODADDY_FTP_PORT', '21'))
+GODADDY_FTP_USER = os.environ.get('GODADDY_FTP_USERNAME')
+GODADDY_FTP_PASSWORD = os.environ.get('GODADDY_FTP_PASSWORD')
+GODADDY_FTP_DIR = os.environ.get('GODADDY_FTP_DIR', '')
+
 # Create the main app
 app = FastAPI(title="eCommerce API", version="1.0.0")
+
+# Parse CORS origins
+cors_origins_str = os.environ.get('CORS_ORIGINS', '*')
+if cors_origins_str == '*':
+    cors_origins = ['*']
+else:
+    cors_origins = [origin.strip() for origin in cors_origins_str.split(',') if origin.strip()]
 
 # Add CORS middleware BEFORE routes
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=[origin.strip() for origin in os.environ.get('CORS_ORIGINS', '*').split(',')],
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=cors_origins,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Import for file serving
@@ -86,6 +120,190 @@ ERROR_MESSAGES = {
     "UNSUPPORTED_LANGUAGE": "Unsupported language",
     "INVALID_FILE": "Invalid file",
 }
+def _godaddy_configured() -> bool:
+    return all([
+        GODADDY_API_KEY,
+        GODADDY_DOMAIN,
+        GODADDY_BASE_URL,
+    ])
+
+
+def _build_godaddy_url(file_name: str) -> str:
+    base_url = GODADDY_BASE_URL.rstrip('/')
+    # Ensure URL starts with https://
+    if not base_url.startswith('http://') and not base_url.startswith('https://'):
+        base_url = f'https://{base_url}'
+    public_path = GODADDY_PUBLIC_PATH if GODADDY_PUBLIC_PATH.startswith('/') else f"/{GODADDY_PUBLIC_PATH}"
+    return f"{base_url}{public_path.rstrip('/')}/{file_name}"
+
+
+async def upload_file_to_godaddy(file_name: str, content: bytes) -> str:
+    logger.info(f"📤 [API] Starting GoDaddy API upload for {file_name} ({len(content)} bytes)")
+    logger.info(f"📤 [API] Domain: {GODADDY_DOMAIN}")
+    logger.info(f"📤 [API] Base URL: {GODADDY_BASE_URL}")
+    logger.info(f"📤 [API] Public Path: {GODADDY_PUBLIC_PATH}")
+    
+    if not _godaddy_configured():
+        logger.error("❌ [API] GoDaddy API is not configured")
+        raise HTTPException(status_code=500, detail="GoDaddy API is not configured")
+
+    try:
+        # GoDaddy API endpoint for uploading files
+        # Using the CNAME approach - upload directly to the domain
+        api_url = f"https://api.godaddy.com/v1/domains/{GODADDY_DOMAIN}/records"
+        
+        # Create authorization header
+        auth_header = f"sso-key {GODADDY_API_KEY}:{GODADDY_API_SECRET}" if GODADDY_API_SECRET else f"sso-key {GODADDY_API_KEY}"
+        
+        headers = {
+            'Authorization': auth_header,
+            'Content-Type': 'application/octet-stream'
+        }
+        
+        # Upload file directly using WebDAV or file endpoint
+        # GoDaddy doesn't have a direct file upload API, so we'll use SFTP instead
+        logger.info(f"📤 [API] Using alternative method: Direct file write")
+        
+        # Since GoDaddy API doesn't support direct file uploads,
+        # we'll use SFTP which is more reliable than FTP
+        await upload_file_via_sftp(file_name, content)
+        
+    except Exception as exc:
+        logger.error(f"❌ [API] Upload error: {type(exc).__name__}: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
+
+    url = _build_godaddy_url(file_name)
+    logger.info(f"✅ [API] Built URL: {url}")
+    return url
+
+
+async def upload_file_via_sftp(file_name: str, content: bytes) -> None:
+    """Upload file via SFTP (more reliable than FTP)"""
+    logger.info(f"📤 [SFTP] Starting SFTP upload for {file_name}")
+    
+    try:
+        import paramiko
+        logger.info(f"📤 [SFTP] paramiko module available")
+    except ImportError:
+        logger.warning(f"⚠️ [SFTP] paramiko not available, using FTP fallback")
+        # Fallback to FTP if paramiko not available
+        await upload_file_to_godaddy_ftp(file_name, content)
+        return
+    
+    def _upload_sftp():
+        import paramiko
+        logger.info(f"📤 [SFTP] Creating SFTP connection...")
+        
+        # Create SSH client
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
+        # Load the SSH key from string
+        logger.info(f"📤 [SFTP] Loading SSH key for authentication")
+        key_file = io.StringIO(GODADDY_SSH_KEY)
+        
+        try:
+            # Try RSA key
+            pkey = paramiko.RSAKey.from_private_key(key_file)
+            logger.info(f"📤 [SFTP] RSA key loaded successfully")
+        except Exception as e:
+            logger.error(f"❌ [SFTP] Failed to load RSA key: {e}")
+            # If it's a public key, we can't use it for auth - fall back to password
+            logger.warning(f"⚠️ [SFTP] SSH key appears to be public key, using password fallback")
+            raise Exception("Public key provided instead of private key")
+        
+        logger.info(f"📤 [SFTP] Connecting to {GODADDY_SSH_HOST}:{GODADDY_SSH_PORT}")
+        ssh.connect(
+            hostname=GODADDY_SSH_HOST,
+            port=GODADDY_SSH_PORT,
+            username=GODADDY_SSH_USERNAME,
+            pkey=pkey,
+            timeout=5
+        )
+        logger.info(f"✅ [SFTP] SSH connected successfully")
+        
+        # Open SFTP session
+        sftp = ssh.open_sftp()
+        logger.info(f"✅ [SFTP] SFTP session opened")
+        
+        # Build remote path
+        remote_path = f"{GODADDY_REMOTE_DIR}/{file_name}"
+        
+        # Ensure directory exists
+        try:
+            logger.info(f"📤 [SFTP] Ensuring directory exists: {GODADDY_REMOTE_DIR}")
+            sftp.stat(GODADDY_REMOTE_DIR)
+        except IOError:
+            logger.info(f"📤 [SFTP] Creating directory: {GODADDY_REMOTE_DIR}")
+            try:
+                sftp.mkdir(GODADDY_REMOTE_DIR)
+            except IOError:
+                pass  # Directory might already exist
+        
+        logger.info(f"📤 [SFTP] Uploading to: {remote_path}")
+        sftp.putfo(io.BytesIO(content), remote_path)
+        logger.info(f"✅ [SFTP] File uploaded successfully")
+        
+        sftp.close()
+        ssh.close()
+    
+    try:
+        logger.info(f"📤 [SFTP] Running SFTP upload in thread...")
+        await asyncio.to_thread(_upload_sftp)
+        logger.info(f"✅ [SFTP] SFTP upload completed")
+    except Exception as exc:
+        logger.error(f"❌ [SFTP] SFTP error: {type(exc).__name__}: {exc}", exc_info=True)
+        # Fall back to FTP if SFTP fails
+        logger.warning(f"⚠️ [SFTP] Falling back to FTP due to error")
+        await upload_file_to_godaddy_ftp(file_name, content)
+
+
+async def upload_file_to_godaddy_ftp(file_name: str, content: bytes) -> str:
+    """Legacy FTP upload (fallback method)"""
+    logger.info(f"📤 [FTP] Starting FTP upload for {file_name} ({len(content)} bytes)")
+    logger.info(f"📤 [FTP] FTP Host: {GODADDY_FTP_HOST}")
+    logger.info(f"📤 [FTP] FTP Port: {GODADDY_FTP_PORT}")
+    logger.info(f"📤 [FTP] FTP Dir: {GODADDY_FTP_DIR}")
+    
+    if not all([GODADDY_FTP_HOST, GODADDY_FTP_USER, GODADDY_FTP_PASSWORD]):
+        logger.error("❌ [FTP] GoDaddy FTP is not configured")
+        raise HTTPException(status_code=500, detail="GoDaddy FTP is not configured")
+
+    def _upload():
+        logger.info(f"📤 [FTP] Creating FTP connection...")
+        with ftplib.FTP(timeout=2) as ftp:
+            logger.info(f"📤 [FTP] Connecting to {GODADDY_FTP_HOST}:{GODADDY_FTP_PORT}")
+            ftp.connect(GODADDY_FTP_HOST, GODADDY_FTP_PORT)
+            logger.info(f"✅ [FTP] Connected successfully")
+            
+            logger.info(f"📤 [FTP] Logging in as {GODADDY_FTP_USER}")
+            ftp.login(GODADDY_FTP_USER, GODADDY_FTP_PASSWORD)
+            logger.info(f"✅ [FTP] Login successful")
+            
+            if GODADDY_FTP_DIR:
+                logger.info(f"📤 [FTP] Changing to directory: {GODADDY_FTP_DIR}")
+                ftp.cwd(GODADDY_FTP_DIR)
+                logger.info(f"✅ [FTP] Changed to directory successfully")
+            
+            logger.info(f"📤 [FTP] Uploading file {file_name}")
+            ftp.storbinary(f"STOR {file_name}", io.BytesIO(content))
+            logger.info(f"✅ [FTP] File uploaded successfully")
+
+    try:
+        logger.info(f"📤 [FTP] Running FTP upload in thread...")
+        await asyncio.to_thread(_upload)
+        logger.info(f"✅ [FTP] FTP upload completed")
+    except ftplib.all_errors as exc:
+        logger.error(f"❌ [FTP] FTP error: {type(exc).__name__}: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
+    except Exception as exc:
+        logger.error(f"❌ [FTP] Unexpected error: {type(exc).__name__}: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to upload image to GoDaddy")
+
+    return _build_godaddy_url(file_name)
+
+
+
 class UserRole(str, Enum):
     ADMIN = "admin"
     CUSTOMER = "customer"
@@ -914,19 +1132,53 @@ async def delete_partner(partner_id: str, admin: User = Depends(require_admin)):
 # File Upload
 @api_router.post("/upload")
 async def upload_file(file: UploadFile = File(...), admin: User = Depends(require_admin)):
-    if not file.filename:
-        raise HTTPException(status_code=400, detail=ERROR_MESSAGES["INVALID_FILE"])
-    file_extension = file.filename.split('.')[-1]
-    file_name = f"{uuid.uuid4()}.{file_extension}"
-    file_path = UPLOADS_DIR / file_name
-    
-    async with aiofiles.open(file_path, 'wb') as f:
+    try:
+        logger.info(f"📸 [Upload] Starting file upload for user {admin.email}")
+        
+        if not file.filename:
+            logger.warning("📸 [Upload] Invalid file - no filename")
+            raise HTTPException(status_code=400, detail=ERROR_MESSAGES["INVALID_FILE"])
+        
+        file_extension = file.filename.split('.')[-1]
+        file_name = f"{uuid.uuid4()}.{file_extension}"
         content = await file.read()
-        await f.write(content)
-    
-    # Return URL with /api prefix so it's accessible through Kubernetes ingress
-    file_url = f"/api/uploads/{file_name}"
-    return {"url": file_url}
+        
+        logger.info(f"📸 [Upload] File info: {file.filename} ({len(content)} bytes) -> {file_name}")
+        logger.info(f"📸 [Upload] GoDaddy configured: {_godaddy_configured()}")
+
+        if _godaddy_configured():
+            logger.info(f"📸 [Upload] Attempting GoDaddy FTP upload...")
+            try:
+                # Try GoDaddy FTP upload first
+                file_url = await upload_file_to_godaddy(file_name, content)
+                logger.info(f"✅ [Upload] Successfully uploaded {file_name} to GoDaddy FTP")
+                logger.info(f"✅ [Upload] File URL: {file_url}")
+            except Exception as ftp_error:
+                # Fallback to local storage if FTP fails
+                logger.warning(f"⚠️ [Upload] GoDaddy FTP upload failed: {str(ftp_error)}")
+                logger.info(f"📸 [Upload] Falling back to local storage...")
+                file_path = UPLOADS_DIR / file_name
+                async with aiofiles.open(file_path, 'wb') as f:
+                    await f.write(content)
+                file_url = f"/api/uploads/{file_name}"
+                logger.info(f"✅ [Upload] Saved to local storage: {file_url}")
+        else:
+            # GoDaddy not configured, use local storage
+            logger.info(f"📸 [Upload] GoDaddy not configured, using local storage")
+            file_path = UPLOADS_DIR / file_name
+            async with aiofiles.open(file_path, 'wb') as f:
+                await f.write(content)
+            file_url = f"/api/uploads/{file_name}"
+            logger.info(f"✅ [Upload] Saved to local storage: {file_url}")
+        
+        logger.info(f"📸 [Upload] Upload complete. Returning: {file_url}")
+        return {"url": file_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        file_name_str = file_name if 'file_name' in locals() else 'unknown'
+        logger.error(f"❌ [Upload] Upload failed for {file_name_str}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to upload image")
 
 # Include the router in the main app
 app.include_router(api_router)

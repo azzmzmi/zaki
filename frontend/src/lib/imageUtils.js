@@ -1,6 +1,6 @@
 /**
  * Get the full image URL for a product
- * Handles both external URLs (Unsplash), local backend uploads, and Render production uploads
+ * Handles external URLs (Unsplash), local backend uploads, and GoDaddy FTP uploads
  * Automatically optimizes to WebP format when supported
  */
 export const getImageUrl = (imageUrl) => {
@@ -17,14 +17,9 @@ export const getImageUrl = (imageUrl) => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
   const isLocalhost = backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1');
   
-  // If it's the /api/uploads path
+  // If it's the /api/uploads path (local uploads or fallback)
   if (imageUrl.startsWith('/api/uploads/')) {
-    if (isLocalhost) {
-      // Local development: use Render's URL for uploaded images
-      const filename = imageUrl.split('/').pop();
-      return `https://sandvally.onrender.com/api/uploads/${filename}`;
-    }
-    // Production: use the backend URL directly
+    // Use the backend URL directly for API uploads
     return `${backendUrl}${imageUrl}`;
   }
   

@@ -33,36 +33,31 @@ export default function Navbar() {
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center flex-shrink-0">
+          <Link to="/" className="flex-shrink-0 flex items-center gap-2">
             <img
               src={process.env.PUBLIC_URL + "/logo.png"}
               alt="Your Store"
               className="h-10 sm:h-12 w-auto"
             />
-            <span className="text-2xl font-bold ml-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="hidden sm:inline text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               {t("app.name")}
             </span>
           </Link>
 
-          {/* Desktop buttons */}
-          <div className="hidden sm:flex items-center space-x-4">
-            {/* Products */}
-            <Link to="/products">
-              <Button variant="ghost">{t("nav.products")}</Button>
+          <div className="flex items-center gap-1 sm:gap-4">
+            <Link to="/products" className="hidden sm:inline" data-testid="products-link">
+              <Button variant="ghost" className="text-sm">{t("nav.products")}</Button>
             </Link>
 
-            {/* Admin */}
             {isAuthenticated() && isAdmin() && (
-              <Link to="/admin">
-                <Button variant="ghost">{t("nav.admin")}</Button>
+              <Link to="/admin" className="hidden sm:inline" data-testid="admin-link">
+                <Button variant="ghost" className="text-sm">{t("nav.admin")}</Button>
               </Link>
             )}
 
-            {/* Cart */}
-            <Link to="/cart" className="relative">
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="w-5 h-5" />
+            <Link to="/cart" className="relative" data-testid="cart-link">
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                <ShoppingCart className="w-4 sm:w-5 h-4 sm:h-5" />
                 {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                     {totalItems}
@@ -71,14 +66,19 @@ export default function Navbar() {
               </Button>
             </Link>
 
-            {/* Theme toggle */}
-            <ThemeSwitcher />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 sm:h-10 sm:w-10"
+              data-testid="theme-toggle"
+            >
+              <ThemeSwitcher />
+            </Button>
 
-            {/* Language */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Globe className="w-5 h-5" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" data-testid="language-menu">
+                  <Globe className="w-4 sm:w-5 h-4 sm:h-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -91,12 +91,11 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* User */}
             {isAuthenticated() ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <User className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" data-testid="user-menu">
+                    <User className="w-4 sm:w-5 h-4 sm:h-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -106,14 +105,17 @@ export default function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link to="/profile">{t("profile.title")}</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">{t("nav.settings")}</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     {t("nav.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link to="/login">
-                <Button>{t("nav.login")}</Button>
+              <Link to="/login" data-testid="login-link">
+                <Button className="text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4">{t("nav.login")}</Button>
               </Link>
             )}
           </div>
@@ -157,7 +159,6 @@ export default function Navbar() {
                   </div>
 
                   {/* Language toggle */}
-                  {/* Language toggle like Theme */}
                   <div className="mt-2 flex items-center justify-between">
                     <span>{t("nav.language")}</span>
 
@@ -197,6 +198,9 @@ export default function Navbar() {
                     <>
                       <DropdownMenuItem asChild>
                         <Link to="/profile">{t("profile.title")}</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/settings">{t("nav.settings")}</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleLogout}>
                         {t("nav.logout")}
