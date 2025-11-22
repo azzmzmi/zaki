@@ -12,7 +12,7 @@ export const getImageUrl = (imageUrl) => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
   
   // If it's a GoDaddy URL (abaadexp.com), try it first but may need fallback
-  if (imageUrl.startsWith('https://abaadexp.com/') || imageUrl.startsWith('http://abaadexp.com/')) {
+  if (imageUrl.startsWith('https://z') || imageUrl.startsWith('http://z')) {
     console.log('🌐 [ImageURL] GoDaddy URL detected:', imageUrl);
     // Return GoDaddy URL - the OptimizedImage component will handle fallback
     return imageUrl;
@@ -26,7 +26,8 @@ export const getImageUrl = (imageUrl) => {
   
   // If it's the /api/uploads path (local uploads or fallback)
   if (imageUrl.startsWith('/api/uploads/')) {
-    const fullUrl = `${backendUrl}${imageUrl}`;
+    imageUrl = imageUrl.replace('/api/uploads/', '');
+    const fullUrl = `https://abaadexp.com/uploads/${imageUrl}`;
     console.log('💾 [ImageURL] Local backend URL:', fullUrl);
     return fullUrl;
   }
@@ -39,7 +40,7 @@ export const getImageUrl = (imageUrl) => {
   }
   
   // Otherwise, assume it's a relative path without leading slash
-  const fullUrl = `${backendUrl}/${imageUrl}`;
+  const fullUrl = `https://abaadexp.com/uploads/${imageUrl}`;
   console.log('📂 [ImageURL] Path converted:', fullUrl);
   return fullUrl;
 };
