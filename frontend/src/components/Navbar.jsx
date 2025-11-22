@@ -66,14 +66,9 @@ export default function Navbar() {
               </Button>
             </Link>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 sm:h-10 sm:w-10"
-              data-testid="theme-toggle"
-            >
+            <div data-testid="theme-toggle">
               <ThemeSwitcher />
-            </Button>
+            </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
