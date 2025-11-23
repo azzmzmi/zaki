@@ -76,6 +76,8 @@ const resources = {
       'auth.loggingIn': 'Logging in...',
       'auth.creatingAccount': 'Creating account...',
       'auth.passwordsDontMatch': 'Passwords do not match',
+      'auth.dontHaveAccount': "Don't have an account?",
+      'auth.haveAccount': 'Already have an account?',
       
       
       // Products
@@ -537,6 +539,7 @@ const resources = {
       'auth.profileUpdateSuccess': 'تم تحديث الملف الشخصي بنجاح',
       'auth.dontHaveAccount': "ليس لديك حساب؟",
       'auth.haveAccount': 'هل لديك حساب؟',
+      
       
       
       // Products
