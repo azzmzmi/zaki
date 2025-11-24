@@ -148,7 +148,7 @@ export default function Products() {
                   <h3 className="font-semibold text-lg line-clamp-2 hover:text-blue-600" data-testid={`product-name-${product.id}`}>{t(`entity.product.${product.id}.name`, { defaultValue: product.name })}</h3>
                 </Link>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-blue-600" data-testid={`product-price-${product.id}`}>${product.price}</span>
+               //   <span className="text-2xl font-bold text-blue-600" data-testid={`product-price-${product.id}`}>${product.price}</span>
                   <span className="text-sm text-gray-500">{t('products.stock')}: {product.stock}</span>
                 </div>
                 <Button
