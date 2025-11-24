@@ -67,7 +67,7 @@ export default function ProductDetail() {
 
         <div className="space-y-4 sm:space-y-6">
           <h1 className="text-2xl sm:text-4xl font-bold" data-testid="product-name">{t(`entity.product.${product.id}.name`, { defaultValue: product.name })}</h1>
-          <div className="text-2xl sm:text-4xl font-bold text-blue-600" data-testid="product-price">${product.price}</div>
+//          <div className="text-2xl sm:text-4xl font-bold text-blue-600" data-testid="product-price">${product.price}</div>
           
           <div>
             <h3 className="font-semibold text-lg mb-2">{t('products.description')}</h3>
