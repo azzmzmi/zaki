@@ -215,9 +215,9 @@ export default function Home() {
                             defaultValue: product.name,
                           })}
                         </h3>
-                        <p className="text-xl font-bold text-blue-600">
-//                          ${product.price}
-                        </p>
+{/*                         <p className="text-xl font-bold text-blue-600">
+                        ${product.price}
+                        </p> */}
                       </div>
                       <Button
                         className="w-full"
