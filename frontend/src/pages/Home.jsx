@@ -216,7 +216,7 @@ export default function Home() {
                           })}
                         </h3>
                         <p className="text-xl font-bold text-blue-600">
-                          ${product.price}
+//                          ${product.price}
                         </p>
                       </div>
                       <Button
